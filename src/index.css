@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #121212;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  background-color: #121212;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+}
+
+.custom-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: #ff5724;
+  cursor: pointer;
+  border-radius: 50%;
+  border: 2px solid white;
+}
+
+.active-glow {
+  box-shadow: 0 0 15px rgba(0, 245, 255, 0.4);
+  border-color: #00f5ff !important;
+}
+
+.bg-grain {
+  background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuB0pszzIhW5cPTzsUfqk2sIekV_1pLe5iYWC8m-R22rHxSRPaNAUSvKXRmzf2-VJYX_GwmckzHLsRrmTzmv7G-ifPcIsb94-jTPokqF4SMgm3mEWJyHu0iG3s3G9lLJ-aqDE8Qu0ksCErLTk-Ay2hv3Kayxlhe4EOQnaqSQqigcJD7OUjMZVYpQV7QStR-USS0rGlTOtx7UjuLCKk3VcOONYwfMTfJsks70p2WjOhLD2kEZaSnPbYy2QB4onoKiL2IO48miadL8FI3U);
+  opacity: 0.03;
+}
