@@ -52,3 +52,21 @@ body,
   background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuB0pszzIhW5cPTzsUfqk2sIekV_1pLe5iYWC8m-R22rHxSRPaNAUSvKXRmzf2-VJYX_GwmckzHLsRrmTzmv7G-ifPcIsb94-jTPokqF4SMgm3mEWJyHu0iG3s3G9lLJ-aqDE8Qu0ksCErLTk-Ay2hv3Kayxlhe4EOQnaqSQqigcJD7OUjMZVYpQV7QStR-USS0rGlTOtx7UjuLCKk3VcOONYwfMTfJsks70p2WjOhLD2kEZaSnPbYy2QB4onoKiL2IO48miadL8FI3U);
   opacity: 0.03;
 }
+
+@keyframes sparkle {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.sparkle-text {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  background-size: 200% 100%;
+  animation: sparkle 3s infinite linear;
+  background-clip: text;
+  -webkit-background-clip: text;
+}

@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'
 import { useAppStore } from '../store'
 import { Button } from '../components/Button'
+import { formatDuration } from '../lib/utils'
 
 export const ResultsView = () => {
     const { score, totalQuestions, answers, setView, resetSession, saveSessionToHistory } = useAppStore()
@@ -11,36 +12,39 @@ export const ResultsView = () => {
 
     const answeredCount = answers.length
     const percentage = answeredCount > 0 ? Math.round((score / answeredCount) * 100) : 0
+    const sessionTime = answers.reduce((acc, curr) => acc + curr.timeSpent, 0);
 
     // Calculate stroke-dashoffset for circular progress
     const circumference = 553
     const offset = circumference - (percentage / 100) * circumference
 
     return (
-        <div className="w-full max-w-4xl mx-auto py-12">
-            <section className="flex flex-col items-center mb-16">
-                <div className="relative flex items-center justify-center">
-                    <svg className="w-48 h-48 transform -rotate-90">
+        <div className="w-full max-w-4xl mx-auto py-8 md:py-12 px-4">
+            <section className="flex flex-col items-center mb-10 md:mb-16">
+                <div className="relative flex items-center justify-center scale-75 md:scale-100">
+                    <svg className="w-48 h-48 transform -rotate-90 text-zinc-800">
                         <circle className="text-white/5" cx="96" cy="96" fill="transparent" r="88" stroke="currentColor" strokeWidth="8"></circle>
                         <circle
                             className="text-green-500 transition-all duration-1000 ease-out"
                             cx="96" cy="96" fill="transparent" r="88"
-                            stroke="currentColor" strokeWidth="8"
+                            stroke="currentColor" strokeWidth="12"
                             strokeDasharray={circumference}
                             strokeDashoffset={offset}
+                            strokeLinecap="round"
                         ></circle>
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span className="text-5xl font-light tracking-tighter text-green-500">{percentage}%</span>
+                        <span className="text-6xl font-black tracking-tighter text-green-500 drop-shadow-[0_0_15px_rgba(34,197,94,0.3)]">{percentage}%</span>
+                        <span className="text-[11px] font-mono text-zinc-400 mt-2 uppercase tracking-[0.2em]">{formatDuration(sessionTime)}</span>
                     </div>
                 </div>
-                <div className="mt-6 text-center">
-                    <h2 className="text-2xl font-semibold mb-1 text-white">Sesión Finalizada</h2>
-                    <p className="text-slate-400 text-sm font-medium">
-                        {score} Correctas / {answeredCount - score} Incorrectas
-                        <span className="mx-2 text-white/10">|</span>
-                        Objetivo: {totalQuestions}
-                    </p>
+                <div className="mt-6 text-center px-2">
+                    <h2 className="text-xl md:text-3xl font-black mb-2 text-white uppercase tracking-tight">Análisis de Misión</h2>
+                    <div className="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-4 text-slate-500 text-[9px] md:text-xs font-mono uppercase tracking-widest">
+                        <p><span className="text-green-500">{score}</span> EXITOSAS // <span className="text-red-500">{answeredCount - score}</span> FALLIDAS</p>
+                        <span className="hidden md:block text-white/5">|</span>
+                        <p>OBJETIVO: {totalQuestions}</p>
+                    </div>
                 </div>
             </section>
 

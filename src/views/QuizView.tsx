@@ -5,6 +5,7 @@ import { ProgressBar } from '../components/ProgressBar'
 import { Button } from '../components/Button'
 import { cn } from '../lib/utils'
 import { MathText } from '../components/MathText'
+import { UtilitiesPanel } from '../components/UtilitiesPanel'
 
 export const QuizView = () => {
     const {
@@ -25,6 +26,7 @@ export const QuizView = () => {
     const [hasAnswered, setHasAnswered] = useState(false)
     const [timeLeft, setTimeLeft] = useState<number | null>(timeRemaining)
     const [isPaused, setIsPaused] = useState(false)
+    const [isUtilsOpen, setIsUtilsOpen] = useState(false)
     const [questionStartTime, setQuestionStartTime] = useState<number>(Date.now())
 
     const currentQuestion = questions[currentQuestionIndex]
@@ -101,6 +103,12 @@ export const QuizView = () => {
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'k' || e.key === 'K') {
+                e.preventDefault()
+                setIsUtilsOpen(prev => !prev)
+                return
+            }
+
             if (e.code === 'Space') {
                 e.preventDefault()
                 setIsPaused(prev => !prev)
@@ -178,24 +186,30 @@ export const QuizView = () => {
                 </div>
             )}
 
-            <header className="flex items-center justify-between px-8 py-6 border-b border-white/5 bg-background-dark/50 backdrop-blur-md relative z-20">
-                <div className="flex items-center gap-3">
-                    <span className="text-white/40 font-medium tracking-widest uppercase text-xs">Progress</span>
-                    <h2 className="text-xl font-bold tracking-tight text-white">Q {currentQuestionIndex + 1} / {totalQuestions}</h2>
+            <header className="flex flex-col md:flex-row items-center justify-between px-6 py-4 md:px-8 md:py-6 border-b border-white/5 bg-background-dark/50 backdrop-blur-md relative z-20 gap-4 md:gap-0">
+                <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
+                    <div className="flex items-center gap-3">
+                        <span className="text-white/40 font-medium tracking-widest uppercase text-xs">Progress</span>
+                        <h2 className="text-lg md:text-xl font-bold tracking-tight text-white">Q {currentQuestionIndex + 1} / {totalQuestions}</h2>
+                    </div>
+                    {/* Compact stats for mobile header */}
+                    <div className="flex md:hidden items-center gap-3 bg-white/5 px-3 py-1.5 rounded-lg border border-white/10 text-xs text-white font-bold font-mono">
+                        <span className="text-green-500">{correctCount}</span> : <span className="text-red-500">{wrongCount}</span>
+                    </div>
                 </div>
 
-                <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center">
-                    <span className="text-[10px] uppercase tracking-[0.2em] text-white/30 mb-1">Time Remaining</span>
+                <div className="md:absolute md:left-1/2 md:-translate-x-1/2 flex flex-col items-center">
+                    <span className="text-[9px] md:text-[10px] uppercase tracking-[0.2em] text-white/30 mb-0.5 md:mb-1">Time Remaining</span>
                     <div className={cn(
-                        "text-3xl font-light font-mono",
+                        "text-xl md:text-3xl font-light font-mono",
                         timeLeft !== null && timeLeft < 60 ? "text-red-500 animate-pulse" : "text-white/50"
                     )}>
                         {formatTime(timeLeft)}
                     </div>
                 </div>
 
-                <div className="flex items-center gap-6">
-                    <div className="flex items-center gap-4 bg-white/5 px-4 py-2 rounded-lg border border-white/10">
+                <div className="flex items-center gap-4 md:gap-6 w-full md:w-auto justify-between md:justify-end">
+                    <div className="hidden md:flex items-center gap-4 bg-white/5 px-4 py-2 rounded-lg border border-white/10">
                         <div className="flex items-center gap-1.5">
                             <span className="text-white font-bold">{correctCount}</span>
                             <span className="material-symbols-outlined text-green-500 text-sm">check_circle</span>
@@ -206,33 +220,42 @@ export const QuizView = () => {
                             <span className="material-symbols-outlined text-red-500 text-sm">cancel</span>
                         </div>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 w-full md:w-auto">
+                        <button
+                            onClick={() => setIsUtilsOpen(true)}
+                            className={cn(
+                                "flex-1 md:flex-none flex size-9 items-center justify-center rounded-lg border transition-all h-10 md:h-9",
+                                isUtilsOpen ? "bg-primary text-background-dark border-primary" : "bg-white/5 border-white/5 hover:bg-white/10 text-white/60"
+                            )}
+                            title="Herramientas de Ingeniería (K)"
+                        >
+                            <span className="material-symbols-outlined text-lg">science</span>
+                            <span className="md:hidden ml-2 text-[10px] font-bold uppercase tracking-widest">Tools</span>
+                        </button>
                         <button
                             onClick={() => setIsPaused(true)}
-                            className="flex size-9 items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 text-white/60 transition-colors"
+                            className="flex-1 md:flex-none flex size-9 items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 text-white/60 transition-colors h-10 md:h-9"
                         >
                             <span className="material-symbols-outlined text-lg">pause</span>
-                        </button>
-                        <button onClick={() => setView('setup')} className="flex size-9 items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 text-white/60 transition-colors">
-                            <span className="material-symbols-outlined text-lg">close</span>
+                            <span className="md:hidden ml-2 text-[10px] font-bold uppercase tracking-widest">Pause</span>
                         </button>
                     </div>
                 </div>
             </header>
 
-            <main className="flex-1 flex flex-col p-6 gap-6 max-w-7xl mx-auto w-full relative z-10 overflow-y-auto">
-                <section className="min-h-[300px] flex gap-6">
-                    <div className="w-full bg-[#1E1E1E] rounded-2xl border border-white/5 flex overflow-hidden shadow-2xl">
-                        <div className="w-1/3 bg-black/20 flex items-center justify-center p-8 border-r border-white/5 relative">
+            <main className="flex-1 flex flex-col p-4 md:p-6 gap-4 md:gap-6 max-w-7xl mx-auto w-full relative z-10 overflow-y-auto custom-scrollbar">
+                <section className="shrink-0 flex flex-col md:flex-row gap-4 md:gap-6">
+                    <div className="w-full bg-[#1E1E1E] rounded-2xl border border-white/5 flex flex-col md:flex-row overflow-hidden shadow-2xl">
+                        <div className="w-full md:w-1/3 bg-black/20 flex items-center justify-center p-6 md:p-8 border-b md:border-b-0 md:border-r border-white/5 relative h-24 md:h-auto shrink-0">
                             <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:24px_24px]"></div>
-                            <div className="flex flex-col items-center gap-4">
-                                <span className="material-symbols-outlined text-primary/20 text-8xl">science</span>
-                                <span className="text-[9px] text-accent-cyan/40 font-mono tracking-widest uppercase">Scenario Generated</span>
+                            <div className="flex flex-row md:flex-col items-center gap-4">
+                                <span className="material-symbols-outlined text-primary/20 text-4xl md:text-8xl">science</span>
+                                <span className="text-[9px] text-accent-cyan/40 font-mono tracking-widest uppercase">Scenario</span>
                             </div>
                         </div>
-                        <div className="flex-1 flex flex-col justify-center p-12">
-                            <span className="text-primary font-bold tracking-[0.3em] text-[10px] mb-4 uppercase">Intuition Drill // {currentQuestion.difficulty}</span>
-                            <h1 className="text-2xl md:text-3xl font-medium leading-relaxed text-white/90">
+                        <div className="flex-1 min-w-0 flex flex-col justify-center p-6 md:p-12 overflow-hidden">
+                            <span className="text-primary font-bold tracking-[0.3em] text-[10px] mb-3 md:mb-4 uppercase shrink-0">Intuition Drill // {currentQuestion.difficulty}</span>
+                            <h1 className="text-sm md:text-lg lg:text-2xl font-medium leading-relaxed text-white/90 break-words [overflow-wrap:anywhere] [word-break:break-word] [hyphens:auto]">
                                 <MathText text={currentQuestion.questionLatex} />
                             </h1>
                         </div>
@@ -260,7 +283,7 @@ export const QuizView = () => {
                     </div>
                 )}
 
-                <section className="flex-1 grid grid-cols-2 gap-6 pb-4">
+                <section className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 pb-6 mt-4">
                     {currentQuestion.options.map((option, i) => {
                         const isSelected = selectedOption === i
                         const isCorrectOption = option.isCorrect
@@ -321,6 +344,11 @@ export const QuizView = () => {
                 progress={((currentQuestionIndex + 1) / totalQuestions) * 100}
                 className="h-1"
                 colorClassName="bg-accent-cyan/40"
+            />
+
+            <UtilitiesPanel
+                isOpen={isUtilsOpen}
+                onClose={() => setIsUtilsOpen(false)}
             />
         </div>
     )

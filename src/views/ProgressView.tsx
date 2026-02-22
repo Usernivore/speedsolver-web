@@ -1,18 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useAppStore } from '../store';
-import { cn } from '../lib/utils';
-
-const stats = {
-    totalSolved: 142,
-    globalAccuracy: 71,
-    streak: 5,
-    skills: {
-        properties: 85, // Strong
-        processes: 60,  // Average
-        cycles: 45,     // Weak (Danger)
-        entropy: 70     // Good
-    }
-};
+import { cn, formatDuration } from '../lib/utils';
 
 const TOPICS_CONFIG = [
     { id: 'properties', label: 'Propiedades', key: 'properties' },
@@ -22,7 +10,47 @@ const TOPICS_CONFIG = [
 ];
 
 export const ProgressView = () => {
-    const { startSession } = useAppStore();
+    const { history, streak, totalSolved, totalTimeSeconds, startSession } = useAppStore();
+
+    // Compute dynamic stats from history or store values
+    const stats = useMemo(() => {
+        const computed = {
+            totalSolved: totalSolved,
+            streak: streak,
+            totalTimeSeconds: totalTimeSeconds,
+            globalAccuracy: 0,
+            skills: {
+                properties: 0,
+                processes: 0,
+                cycles: 0,
+                entropy: 0
+            }
+        };
+
+        if (history.length > 0) {
+            let totalQ = 0;
+            let totalC = 0;
+            const tTotals: any = { properties: 0, processes: 0, cycles: 0, entropy: 0 };
+            const tCorrect: any = { properties: 0, processes: 0, cycles: 0, entropy: 0 };
+
+            history.forEach(s => {
+                totalQ += s.totalQuestions;
+                totalC += s.score;
+                Object.keys(s.topicStats).forEach(topic => {
+                    if (tTotals[topic] !== undefined) {
+                        tTotals[topic] += s.topicStats[topic].total;
+                        tCorrect[topic] += s.topicStats[topic].correct;
+                    }
+                });
+            });
+
+            computed.globalAccuracy = Math.round((totalC / totalQ) * 100);
+            (Object.keys(computed.skills) as Array<keyof typeof computed.skills>).forEach(t => {
+                computed.skills[t] = tTotals[t] > 0 ? Math.round((tCorrect[t] / tTotals[t]) * 100) : 0;
+            });
+        }
+        return computed;
+    }, [history, streak, totalSolved, totalTimeSeconds]);
 
     // Identify weakest topic
     const weakestTopicKey = (Object.keys(stats.skills) as Array<keyof typeof stats.skills>).reduce((a, b) =>
@@ -33,7 +61,6 @@ export const ProgressView = () => {
 
     const handleRepair = () => {
         if (weakestTopic) {
-            // Start a session with 5 questions, 10 mins, and only the weakest topic
             startSession(5, 600, [weakestTopic.id]);
         }
     };
@@ -73,9 +100,10 @@ export const ProgressView = () => {
             </div>
 
             {/* KPI Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                 {[
                     { label: 'Total Resueltos', value: stats.totalSolved, sub: 'EJERCICIOS', highlight: false },
+                    { label: 'Tiempo de Estudio', value: formatDuration(stats.totalTimeSeconds), sub: 'TOTAL ACUMULADO', highlight: false, isTime: true },
                     { label: 'Precisión Global', value: `${stats.globalAccuracy}%`, sub: 'RATIO DE ÉXITO', highlight: true },
                     { label: 'Racha Actual', value: stats.streak, sub: 'DÍAS ACTIVOS', highlight: false },
                 ].map((kpi, i) => (
@@ -87,8 +115,9 @@ export const ProgressView = () => {
                         <p className="text-[10px] font-mono text-gray-400 uppercase tracking-widest mb-1">{kpi.label}</p>
                         <div className="flex items-baseline gap-2">
                             <span className={cn(
-                                "text-5xl font-black tracking-tighter",
-                                kpi.highlight ? "text-orange-500" : "text-white"
+                                "font-black tracking-tighter",
+                                kpi.highlight ? "text-orange-500" : "text-white",
+                                kpi.isTime ? "text-2xl" : "text-5xl"
                             )}>
                                 {kpi.value}
                             </span>
@@ -102,68 +131,73 @@ export const ProgressView = () => {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
                 {/* Radar Chart (Skill Diamond) */}
-                <div className="lg:col-span-7 bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 flex flex-col items-center justify-center relative min-h-[500px]">
+                <div className="w-full lg:col-span-7 bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-6 md:p-8 flex flex-col items-center justify-center relative min-h-[350px] md:min-h-[500px] overflow-hidden">
                     <div className="absolute top-6 left-8">
                         <h3 className="text-sm font-mono text-gray-400 uppercase tracking-widest">Skill Diamond</h3>
                         <div className="h-1 w-12 bg-orange-500 mt-2" />
                     </div>
 
-                    <svg width={size} height={size} className="drop-shadow-[0_0_15px_rgba(249,115,22,0.1)]">
-                        {/* Grid Lines */}
-                        {gridLevels.map((level) => (
+                    <div className="w-full max-w-[320px] md:max-w-[400px] aspect-square flex items-center justify-center">
+                        <svg
+                            viewBox={`0 0 ${size} ${size}`}
+                            className="w-full h-full drop-shadow-[0_0_15px_rgba(249,115,22,0.1)]"
+                        >
+                            {/* Grid Lines */}
+                            {gridLevels.map((level) => (
+                                <polygon
+                                    key={level}
+                                    points={`${center},${center - (level / 100) * radius} ${center + (level / 100) * radius},${center} ${center},${center + (level / 100) * radius} ${center - (level / 100) * radius},${center}`}
+                                    fill="none"
+                                    stroke="currentColor"
+                                    className="text-gray-800"
+                                    strokeWidth="1"
+                                />
+                            ))}
+
+                            {/* Axes */}
+                            <line x1={center} y1={center - radius} x2={center} y2={center + radius} stroke="currentColor" className="text-gray-800" strokeWidth="1" />
+                            <line x1={center - radius} y1={center} x2={center + radius} y2={center} stroke="currentColor" className="text-gray-800" strokeWidth="1" />
+
+                            {/* Player Polygon */}
                             <polygon
-                                key={level}
-                                points={`${center},${center - (level / 100) * radius} ${center + (level / 100) * radius},${center} ${center},${center + (level / 100) * radius} ${center - (level / 100) * radius},${center}`}
-                                fill="none"
-                                stroke="currentColor"
-                                className="text-gray-800"
-                                strokeWidth="1"
+                                points={playerPoints}
+                                fill="rgba(249, 115, 22, 0.2)"
+                                stroke="#f97316"
+                                strokeWidth="3"
+                                strokeLinejoin="round"
+                                className="animate-pulse-slow"
                             />
-                        ))}
 
-                        {/* Axes */}
-                        <line x1={center} y1={center - radius} x2={center} y2={center + radius} stroke="currentColor" className="text-gray-800" strokeWidth="1" />
-                        <line x1={center - radius} y1={center} x2={center + radius} y2={center} stroke="currentColor" className="text-gray-800" strokeWidth="1" />
+                            {/* Labels */}
+                            {TOPICS_CONFIG.map((t, i) => {
+                                const labelRadius = radius + 30;
+                                let x = center;
+                                let y = center;
+                                let anchor: "inherit" | "middle" | "start" | "end" = "middle";
 
-                        {/* Player Polygon */}
-                        <polygon
-                            points={playerPoints}
-                            fill="rgba(249, 115, 22, 0.2)"
-                            stroke="#f97316"
-                            strokeWidth="3"
-                            strokeLinejoin="round"
-                            className="animate-pulse-slow"
-                        />
+                                if (i === 0) { y = center - labelRadius; }
+                                else if (i === 1) { x = center + labelRadius; anchor = "start"; }
+                                else if (i === 2) { y = center + labelRadius + 10; }
+                                else if (i === 3) { x = center - labelRadius; anchor = "end"; }
 
-                        {/* Labels */}
-                        {TOPICS_CONFIG.map((t, i) => {
-                            const labelRadius = radius + 30;
-                            let x = center;
-                            let y = center;
-                            let anchor: "inherit" | "middle" | "start" | "end" = "middle";
-
-                            if (i === 0) { y = center - labelRadius; }
-                            else if (i === 1) { x = center + labelRadius; anchor = "start"; }
-                            else if (i === 2) { y = center + labelRadius + 10; }
-                            else if (i === 3) { x = center - labelRadius; anchor = "end"; }
-
-                            return (
-                                <text
-                                    key={t.id}
-                                    x={x}
-                                    y={y}
-                                    textAnchor={anchor}
-                                    className="fill-gray-400 text-[10px] font-mono uppercase tracking-tighter"
-                                >
-                                    {t.label}
-                                </text>
-                            );
-                        })}
-                    </svg>
+                                return (
+                                    <text
+                                        key={t.id}
+                                        x={x}
+                                        y={y}
+                                        textAnchor={anchor}
+                                        className="fill-gray-400 text-[10px] font-mono uppercase tracking-tighter"
+                                    >
+                                        {t.label}
+                                    </text>
+                                );
+                            })}
+                        </svg>
+                    </div>
                 </div>
 
                 {/* Diagnostics Panel */}
-                <div className="lg:col-span-5 space-y-6">
+                <div className="w-full lg:col-span-5 space-y-6">
                     <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 h-full flex flex-col">
                         <div className="flex items-center gap-3 mb-8">
                             <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />

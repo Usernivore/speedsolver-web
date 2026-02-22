@@ -18,8 +18,8 @@ export const SetupView = () => {
     }
 
     const handleStart = () => {
-        const topics = selectedTopics.length > 0 ? selectedTopics : ['properties', 'processes', 'cycles', 'entropy'];
-        startSession(problemCount, timeLimit, topics);
+        if (selectedTopics.length === 0) return;
+        startSession(problemCount, timeLimit, selectedTopics);
     }
 
     const modes = [
@@ -71,7 +71,7 @@ export const SetupView = () => {
                         <span className="material-symbols-outlined text-primary text-sm">schedule</span>
                         <h3 className="text-sm uppercase tracking-widest font-semibold text-zinc-400">Presión de Tiempo</h3>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                         {modes.map((mode) => (
                             <button
                                 key={mode.label}
@@ -112,16 +112,29 @@ export const SetupView = () => {
                     </div>
                 </section>
 
-                <div className="flex gap-4">
-                    <Button icon="bolt" onClick={handleStart} className="flex-1">
-                        INICIAR SESIÓN
-                    </Button>
-                    <button
-                        onClick={() => useAppStore.getState().setView('dashboard')}
-                        className="px-6 border border-zinc-700 hover:border-zinc-500 rounded-lg text-xs font-bold tracking-widest text-zinc-400 transition-all uppercase"
-                    >
-                        Stats
-                    </button>
+                <div className="flex flex-col gap-4">
+                    <div className="flex gap-4">
+                        <Button
+                            icon="bolt"
+                            onClick={handleStart}
+                            className={`flex-1 ${selectedTopics.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            disabled={selectedTopics.length === 0}
+                            title={selectedTopics.length === 0 ? "Selecciona al menos un tema para comenzar" : ""}
+                        >
+                            INICIAR SESIÓN
+                        </Button>
+                        <button
+                            onClick={() => useAppStore.getState().setView('dashboard')}
+                            className="px-6 border border-zinc-700 hover:border-zinc-500 rounded-lg text-xs font-bold tracking-widest text-zinc-400 transition-all uppercase"
+                        >
+                            Stats
+                        </button>
+                    </div>
+                    {selectedTopics.length === 0 && (
+                        <p className="text-[10px] text-orange-500 font-bold animate-pulse text-center uppercase tracking-widest">
+                            ⚠️ Debe seleccionar al menos un tema de estudio
+                        </p>
+                    )}
                 </div>
 
                 <div className="mt-6 p-4 rounded-xl bg-primary/5 border border-primary/10 flex items-center gap-3">

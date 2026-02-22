@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { generateSession, GeneratedQuestion } from './speedsolver_engine/thermodynamics/ThermoEngine'
 
-export type View = 'setup' | 'quiz' | 'results' | 'dashboard' | 'profile'
+export type View = 'setup' | 'quiz' | 'results' | 'dashboard' | 'profile' | 'tools' | 'rankine' | 'interpolator' | 'unit-converter'
 
 export interface SessionResult {
     questionId: string
@@ -43,6 +43,10 @@ interface AppState {
     timeRemaining: number | null
     answers: SessionResult[]
     history: SessionSummary[]
+    streak: number
+    totalSolved: number
+    totalTimeSeconds: number
+    lastActivityDate: string | null
 
     startSession: (total: number, timeLimit: number | null, topics: string[]) => void
     addResult: (result: SessionResult) => void
@@ -75,6 +79,10 @@ export const useAppStore = create<AppState>()(
             timeRemaining: null,
             answers: [],
             history: [],
+            streak: 0,
+            totalSolved: 0,
+            totalTimeSeconds: 0,
+            lastActivityDate: null,
 
             startSession: (total, timeLimit, topics) => {
                 const generatedQuestions = generateSession(topics, total);
@@ -108,28 +116,68 @@ export const useAppStore = create<AppState>()(
                 if (state.answers.length === 0) return
 
                 const topicStats: { [topic: string]: { correct: number, total: number } } = {}
+                const TOPIC_MAP: Record<string, string> = {
+                    "termo_properties_ideal_gas": "properties",
+                    "termo_gas_density": "properties",
+                    "termo_internal_energy": "properties",
+                    "termo_isobaric": "processes",
+                    "termo_isochoric": "processes",
+                    "termo_isothermal": "processes",
+                    "termo_adiabatic": "processes",
+                    "termo_carnot_cycle": "cycles",
+                    "termo_thermal_machines": "cycles",
+                    "termo_entropy": "entropy"
+                };
+
                 state.answers.forEach(ans => {
-                    if (!topicStats[ans.topic]) {
-                        topicStats[ans.topic] = { correct: 0, total: 0 }
+                    const normalizedTopic = TOPIC_MAP[ans.topic] || ans.topic;
+                    if (!topicStats[normalizedTopic]) {
+                        topicStats[normalizedTopic] = { correct: 0, total: 0 }
                     }
-                    topicStats[ans.topic].total++
+                    topicStats[normalizedTopic].total++
                     if (ans.isCorrect) {
-                        topicStats[ans.topic].correct++
+                        topicStats[normalizedTopic].correct++
                     }
                 })
 
                 const summary: SessionSummary = {
                     date: new Date().toISOString(),
                     score: state.score,
-                    totalQuestions: state.totalQuestions,
+                    totalQuestions: state.answers.length,
                     topicStats,
                     timeSpentSeconds: state.timeLimitSeconds !== null && state.timeRemaining !== null
                         ? state.timeLimitSeconds - state.timeRemaining
                         : 0
                 }
 
+                const sessionTime = state.answers.reduce((acc, curr) => acc + curr.timeSpent, 0);
+
+                // Streak Logic
+                const now = new Date();
+                const todayStr = now.toISOString().split('T')[0];
+                const lastDate = state.lastActivityDate;
+                let newStreak = state.streak;
+
+                if (!lastDate) {
+                    newStreak = 1;
+                } else {
+                    const yesterday = new Date(now);
+                    yesterday.setDate(now.getDate() - 1);
+                    const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+                    if (lastDate === yesterdayStr) {
+                        newStreak += 1;
+                    } else if (lastDate !== todayStr) {
+                        newStreak = 1;
+                    }
+                }
+
                 set((state) => ({
-                    history: [summary, ...state.history]
+                    history: [summary, ...state.history],
+                    streak: newStreak,
+                    totalSolved: state.totalSolved + state.answers.length,
+                    totalTimeSeconds: state.totalTimeSeconds + sessionTime,
+                    lastActivityDate: todayStr
                 }))
             },
 

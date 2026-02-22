@@ -37,15 +37,15 @@ export const ProfileView = () => {
                 onClose={() => setShowToast(false)}
             />
 
-            <div className="flex justify-between items-end">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 px-4 md:px-0">
                 <div>
-                    <h2 className="text-3xl font-bold tracking-tight text-white">Configuración de Cuenta</h2>
-                    <p className="text-slate-400 mt-1">Gestione su identidad de ingeniería y preferencias de entorno.</p>
+                    <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-white">Configuración de Cuenta</h2>
+                    <p className="text-slate-400 mt-1 text-sm md:text-base">Gestione su identidad de ingeniería y preferencias de entorno.</p>
                 </div>
             </div>
 
             <div className="bg-[#1E1E1E] border border-white/5 rounded-xl shadow-2xl overflow-hidden">
-                <div className="p-8 md:p-12">
+                <div className="p-6 md:p-12">
                     <form className="space-y-10" onSubmit={handleSave}>
                         {/* Avatar Section */}
                         <div className="flex flex-col items-center justify-center space-y-4">

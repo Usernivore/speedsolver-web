@@ -1,11 +1,12 @@
 import { useAppStore } from '../store'
 import { Button } from './Button'
+import { cn } from '../lib/utils'
 
 export const Sidebar = () => {
     const { setView, currentView, userProfile } = useAppStore()
 
     return (
-        <aside className="w-64 flex-shrink-0 bg-[#1E1E1E] border-r border-white/5 flex flex-col justify-between p-4 h-full">
+        <aside className="w-full md:w-64 flex-shrink-0 bg-[#1E1E1E] border-b md:border-b-0 md:border-r border-white/5 flex flex-col justify-between p-4 md:h-full">
             <div className="flex flex-col gap-8">
                 <div className="flex items-center gap-3 px-2">
                     <div className="bg-accent-cyan rounded-lg size-10 flex items-center justify-center">
@@ -19,24 +20,43 @@ export const Sidebar = () => {
                 <nav className="flex flex-col gap-1">
                     <button
                         onClick={() => setView('setup')}
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-accent-cyan/10 hover:text-accent-cyan transition-colors"
+                        className={cn(
+                            "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all group",
+                            currentView === 'setup' ? "bg-orange-500/10 text-orange-500" : "text-slate-400 hover:bg-orange-500/10 hover:text-orange-500"
+                        )}
                     >
-                        <span className="material-symbols-outlined">home</span>
-                        <span className="text-sm font-medium">Inicio</span>
+                        <span className="material-symbols-outlined transition-transform group-active:scale-95">thermometer</span>
+                        <span className="text-sm font-bold uppercase tracking-tight">Termo</span>
                     </button>
                     <button
                         onClick={() => setView('dashboard')}
-                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${currentView === 'dashboard' ? 'bg-accent-cyan/10 text-accent-cyan' : 'text-slate-400 hover:bg-accent-cyan/10 hover:text-accent-cyan'}`}
+                        className={cn(
+                            "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all group",
+                            currentView === 'dashboard' ? "bg-accent-cyan/10 text-accent-cyan" : "text-slate-400 hover:bg-accent-cyan/10 hover:text-accent-cyan"
+                        )}
                     >
-                        <span className="material-symbols-outlined" style={{ fontVariationSettings: currentView === 'dashboard' ? "'FILL' 1" : "" }}>analytics</span>
-                        <span className="text-sm font-medium">Análisis & Stats</span>
+                        <span className="material-symbols-outlined transition-transform group-active:scale-95" style={{ fontVariationSettings: currentView === 'dashboard' ? "'FILL' 1" : "" }}>analytics</span>
+                        <span className="text-sm font-bold uppercase tracking-tight">Análisis</span>
                     </button>
                     <button
                         onClick={() => setView('profile')}
-                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${currentView === 'profile' ? 'bg-accent-cyan/10 text-accent-cyan' : 'text-slate-400 hover:bg-accent-cyan/10 hover:text-accent-cyan'}`}
+                        className={cn(
+                            "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all group",
+                            currentView === 'profile' ? "bg-zinc-100/10 text-white" : "text-slate-400 hover:bg-zinc-100/10 hover:text-white"
+                        )}
                     >
-                        <span className="material-symbols-outlined" style={{ fontVariationSettings: currentView === 'profile' ? "'FILL' 1" : "" }}>person</span>
-                        <span className="text-sm font-medium">Mi Perfil</span>
+                        <span className="material-symbols-outlined transition-transform group-active:scale-95" style={{ fontVariationSettings: currentView === 'profile' ? "'FILL' 1" : "" }}>person</span>
+                        <span className="text-sm font-bold uppercase tracking-tight">Perfil</span>
+                    </button>
+                    <button
+                        onClick={() => setView('tools')}
+                        className={cn(
+                            "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all group",
+                            currentView === 'tools' ? "bg-white/10 text-white" : "text-slate-400 hover:bg-white/10 hover:text-white"
+                        )}
+                    >
+                        <span className="material-symbols-outlined transition-transform group-active:scale-95 sparkle-text" style={{ fontVariationSettings: currentView === 'tools' ? "'FILL' 1" : "" }}>handyman</span>
+                        <span className="text-sm font-bold uppercase tracking-tight">Tools</span>
                     </button>
                 </nav>
             </div>

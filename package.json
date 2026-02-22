@@ -3,13 +3,17 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "homepage": "https://speedsolver.space",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "tsc && vite build",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tr0j332/thermo.eos.iapws97": "^0.0.2",
     "clsx": "^2.1.1",
     "katex": "^0.16.28",
     "lucide-react": "^0.563.0",

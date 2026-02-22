@@ -5,6 +5,10 @@ import { ResultsView } from './views/ResultsView'
 import { SetupView } from './views/SetupView'
 import { QuizView } from './views/QuizView'
 import { ProfileView } from './views/ProfileView'
+import { ToolsView } from './views/ToolsView'
+import { RankineView } from './views/RankineView'
+import { InterpolatorView } from './views/InterpolatorView'
+import { UnitConverterView } from './views/UnitConverterView'
 
 function App() {
   const currentView = useAppStore((state) => state.currentView)
@@ -21,6 +25,14 @@ function App() {
         return <ProgressView />
       case 'profile':
         return <ProfileView />
+      case 'tools':
+        return <ToolsView />
+      case 'rankine':
+        return <RankineView />
+      case 'interpolator':
+        return <InterpolatorView />
+      case 'unit-converter':
+        return <UnitConverterView />
       default:
         return <SetupView />
     }
