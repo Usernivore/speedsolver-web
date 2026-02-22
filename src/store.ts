@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { generateSession, GeneratedQuestion } from './speedsolver_engine/thermodynamics/ThermoEngine'
 
-export type View = 'setup' | 'quiz' | 'results' | 'dashboard' | 'profile' | 'tools' | 'rankine' | 'interpolator' | 'unit-converter'
+export type View = 'setup' | 'quiz' | 'results' | 'dashboard' | 'profile' | 'tools' | 'rankine' | 'interpolator' | 'unit-converter' | 'privacy' | 'terms'
 
 export interface SessionResult {
     questionId: string

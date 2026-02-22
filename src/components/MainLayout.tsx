@@ -15,7 +15,8 @@ export const MainLayout = ({ children, className, showNav = true }: MainLayoutPr
     const currentView = useAppStore((state) => state.currentView)
     const userProfile = useAppStore((state) => state.userProfile)
     const streak = useAppStore((state) => state.streak)
-    const isAppView = currentView === 'dashboard' || currentView === 'profile' || currentView === 'tools' || currentView === 'rankine' || currentView === 'interpolator' || currentView === 'unit-converter'
+    const isLegalView = currentView === 'privacy' || currentView === 'terms'
+    const isAppView = (currentView === 'dashboard' || currentView === 'profile' || currentView === 'tools' || currentView === 'rankine' || currentView === 'interpolator' || currentView === 'unit-converter') && !isLegalView
 
     return (
         <div className={cn(
@@ -108,6 +109,19 @@ export const MainLayout = ({ children, className, showNav = true }: MainLayoutPr
                     {children}
                 </main>
             </div>
+
+            {/* Global Legal Footer */}
+            {!isAppView && currentView !== 'quiz' && (
+                <footer className="relative z-20 py-8 px-6 border-t border-white/5 bg-black/20 mt-auto">
+                    <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] uppercase font-bold tracking-widest text-zinc-600">
+                        <p>© {new Date().getFullYear()} SpeedSolver Engine. All Rights Reserved.</p>
+                        <div className="flex gap-6">
+                            <button onClick={() => setView('privacy')} className="hover:text-primary transition-colors">Privacy Policy</button>
+                            <button onClick={() => setView('terms')} className="hover:text-primary transition-colors">Terms of Service</button>
+                        </div>
+                    </div>
+                </footer>
+            )}
         </div>
     )
 }

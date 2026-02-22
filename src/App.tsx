@@ -9,6 +9,8 @@ import { ToolsView } from './views/ToolsView'
 import { RankineView } from './views/RankineView'
 import { InterpolatorView } from './views/InterpolatorView'
 import { UnitConverterView } from './views/UnitConverterView'
+import { PrivacyView, TermsView } from './views/LegalViews'
+import { Analytics } from './components/Analytics'
 
 function App() {
   const currentView = useAppStore((state) => state.currentView)
@@ -33,6 +35,10 @@ function App() {
         return <InterpolatorView />
       case 'unit-converter':
         return <UnitConverterView />
+      case 'privacy':
+        return <PrivacyView />
+      case 'terms':
+        return <TermsView />
       default:
         return <SetupView />
     }
@@ -40,6 +46,7 @@ function App() {
 
   return (
     <MainLayout>
+      <Analytics />
       {renderView()}
     </MainLayout>
   )
