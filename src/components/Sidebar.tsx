@@ -9,8 +9,8 @@ export const Sidebar = () => {
         <aside className="w-full md:w-64 flex-shrink-0 bg-[#1E1E1E] border-b md:border-b-0 md:border-r border-white/5 flex flex-col justify-between p-4 md:h-full">
             <div className="flex flex-col gap-8">
                 <div className="flex items-center gap-3 px-2">
-                    <div className="bg-accent-cyan rounded-lg size-10 flex items-center justify-center">
-                        <span className="material-symbols-outlined text-background-dark font-bold">architecture</span>
+                    <div className="bg-accent-cyan rounded-lg size-10 flex items-center justify-center overflow-hidden">
+                        <img src="/logo-speed.png" alt="Logo" className="w-full h-full object-contain p-1.5" />
                     </div>
                     <div className="flex flex-col">
                         <h1 className="text-base font-bold leading-tight uppercase truncate max-w-[140px]">{userProfile.name.split(' ').pop()} Stats</h1>

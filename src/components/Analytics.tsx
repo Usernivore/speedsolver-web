@@ -19,8 +19,9 @@ export const Analytics = () => {
 
         // Initialize GA
         window.dataLayer = window.dataLayer || [];
-        function gtag(...args: any[]) {
-            window.dataLayer.push(args);
+        function gtag(..._args: any[]) {
+            // eslint-disable-next-line prefer-rest-params
+            window.dataLayer.push(arguments);
         }
         gtag('js', new Date());
         gtag('config', measurementId);

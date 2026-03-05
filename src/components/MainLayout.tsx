@@ -31,8 +31,8 @@ export const MainLayout = ({ children, className, showNav = true }: MainLayoutPr
                 <header className="relative z-20 flex items-center justify-between px-6 md:px-10 py-4 border-b border-white/5 bg-[#121212]/80 backdrop-blur-xl">
                     <div className="flex items-center gap-8">
                         <div className="flex items-center gap-3 cursor-pointer group" onClick={() => setView('setup')}>
-                            <div className="bg-orange-500 rounded-lg size-10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-[0_0_20px_rgba(255,87,34,0.3)]">
-                                <span className="material-symbols-outlined text-black font-black">architecture</span>
+                            <div className="bg-orange-500 rounded-lg size-10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-[0_0_20px_rgba(255,87,34,0.3)] overflow-hidden">
+                                <img src="/logo-speed.png" alt="Logo" className="w-full h-full object-contain p-1.5" />
                             </div>
                             <h2 className="text-xl font-black tracking-tighter uppercase italic">
                                 SpeedSolver
