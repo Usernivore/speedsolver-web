@@ -22,7 +22,8 @@ export interface GeneratedQuestion {
 /**
  * Generates a question about Isobaric Processes
  */
-export const generateIsobaricQuestion = (): GeneratedQuestion => {
+export const generateIsobaricQuestion = (lang: 'es' | 'en' = 'es'): GeneratedQuestion => {
+    const isEn = lang === 'en';
     // 1. Configuration & Constants
     const R_JOULES = 8.314;
     const ATM_L_TO_J = 101.325;
@@ -36,10 +37,10 @@ export const generateIsobaricQuestion = (): GeneratedQuestion => {
 
     // 3. Select Special Variable (Gas Info)
     const gas_info_options = [
-        { label: "Monoatómico (He)", f: 3, cv_factor: 1.5, cp_factor: 2.5 },
-        { label: "Monoatómico (Ar)", f: 3, cv_factor: 1.5, cp_factor: 2.5 },
-        { label: "Diatómico (N2)", f: 5, cv_factor: 2.5, cp_factor: 3.5 },
-        { label: "Diatómico (O2)", f: 5, cv_factor: 2.5, cp_factor: 3.5 }
+        { label: isEn ? "Monatomic (He)" : "Monoatómico (He)", f: 3, cv_factor: 1.5, cp_factor: 2.5 },
+        { label: isEn ? "Monatomic (Ar)" : "Monoatómico (Ar)", f: 3, cv_factor: 1.5, cp_factor: 2.5 },
+        { label: isEn ? "Diatomic (N2)" : "Diatómico (N2)", f: 5, cv_factor: 2.5, cp_factor: 3.5 },
+        { label: isEn ? "Diatomic (O2)" : "Diatómico (O2)", f: 5, cv_factor: 2.5, cp_factor: 3.5 }
     ];
     const selectedGas = gas_info_options[Math.floor(Math.random() * gas_info_options.length)];
 
@@ -59,9 +60,16 @@ export const generateIsobaricQuestion = (): GeneratedQuestion => {
         const work_atm_L = pressure_atm * delta_v;
         correctAnswer = parseFloat((work_atm_L * ATM_L_TO_J).toFixed(1));
 
-        questionLatex = `Un gas se expande isobáricamente a una presión constante de $${pressure_atm}$ atm desde un volumen de $${vol_initial_L}$ L hasta $${vol_final_L}$ L. Calcule el trabajo ($W$) realizado por el gas en Joules.`;
+        questionLatex = isEn
+            ? `A gas expands isobarically at a constant pressure of $${pressure_atm}$ atm from a volume of $${vol_initial_L}$ L to $${vol_final_L}$ L. Calculate the work ($W$) done by the gas in Joules.`
+            : `Un gas se expande isobáricamente a una presión constante de $${pressure_atm}$ atm desde un volumen de $${vol_initial_L}$ L hasta $${vol_final_L}$ L. Calcule el trabajo ($W$) realizado por el gas en Joules.`;
 
-        explanation = `
+        explanation = isEn ? `
+1. **Calculate volume change**: $\\Delta V = V_f - V_i = ${vol_final_L} - ${vol_initial_L} = ${delta_v.toFixed(1)} \\text{ L}$.
+2. **Isobaric work formula**: $W = P\\Delta V$.
+3. **Substitution**: $W = (${pressure_atm} \\text{ atm})(${delta_v.toFixed(1)} \\text{ L}) = ${work_atm_L.toFixed(2)} \\text{ atm}\\cdot\\text{L}$.
+4. **Conversion to Joules**: $W = ${work_atm_L.toFixed(2)} \\times 101.325 = \\mathbf{${correctAnswer.toLocaleString()} \\text{ J}}$.
+    `.trim() : `
 1. **Calcular cambio de volumen**: $\\Delta V = V_f - V_i = ${vol_final_L} - ${vol_initial_L} = ${delta_v.toFixed(1)} \\text{ L}$.
 2. **Fórmula de trabajo isobárico**: $W = P\\Delta V$.
 3. **Sustitución**: $W = (${pressure_atm} \\text{ atm})(${delta_v.toFixed(1)} \\text{ L}) = ${work_atm_L.toFixed(2)} \\text{ atm}\\cdot\\text{L}$.
@@ -77,9 +85,16 @@ export const generateIsobaricQuestion = (): GeneratedQuestion => {
         const cp = selectedGas.cp_factor * R_JOULES;
         correctAnswer = parseFloat((moles_n * cp * delta_T_C).toFixed(1));
 
-        questionLatex = `Se calienta isobáricamente $${moles_n}$ moles de un gas **${selectedGas.label}**, elevando su temperatura en $${delta_T_C}^\\circ\\text{C}$. Calcule el calor ($Q$) transferido al sistema.`;
+        questionLatex = isEn
+            ? `$${moles_n}$ moles of a **${selectedGas.label}** gas are heated isobarically, raising its temperature by $${delta_T_C}^\\circ\\text{C}$. Calculate the heat ($Q$) transferred to the system.`
+            : `Se calienta isobáricamente $${moles_n}$ moles de un gas **${selectedGas.label}**, elevando su temperatura en $${delta_T_C}^\\circ\\text{C}$. Calcule el calor ($Q$) transferido al sistema.`;
 
-        explanation = `
+        explanation = isEn ? `
+1. **Identify $C_p$**: For a ${selectedGas.label} gas ($f=${selectedGas.f}$), the specific heat at constant pressure is $C_p = \\frac{f+2}{2}R = ${selectedGas.cp_factor}R$.
+2. **Isobaric Heat Formula**: $Q = nC_p\\Delta T$.
+3. **Substitution**: $Q = (${moles_n}) (${selectedGas.cp_factor} \\times 8.314) (${delta_T_C})$.
+4. **Result**: $Q = \\mathbf{${correctAnswer.toLocaleString()} \\text{ J}}$.
+    `.trim() : `
 1. **Identificar $C_p$**: Para un gas ${selectedGas.label} ($f=${selectedGas.f}$), el calor específico a presión constante es $C_p = \\frac{f+2}{2}R = ${selectedGas.cp_factor}R$.
 2. **Fórmula de Calor Isobárico**: $Q = nC_p\\Delta T$.
 3. **Sustitución**: $Q = (${moles_n})(${selectedGas.cp_factor} \\times 8.314)(${delta_T_C})$.

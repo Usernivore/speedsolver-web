@@ -22,7 +22,8 @@ export interface GeneratedQuestion {
 /**
  * Generates a question about Adiabatic Processes
  */
-export const generateAdiabaticQuestion = (): GeneratedQuestion => {
+export const generateAdiabaticQuestion = (lang: 'es' | 'en' = 'es'): GeneratedQuestion => {
+    const isEn = lang === 'en';
     // 1. Configuration & Constants
     const R_JOULES = 8.314;
     const ABS_ZERO = 273.15;
@@ -35,10 +36,10 @@ export const generateAdiabaticQuestion = (): GeneratedQuestion => {
 
     // 3. Select Special Variable (Gas Info)
     const gas_info_options = [
-        { label: "Monoatómico (He)", gamma: 1.67, cv_factor: 1.5 },
-        { label: "Monoatómico (Ar)", gamma: 1.67, cv_factor: 1.5 },
-        { label: "Diatómico (N2)", gamma: 1.4, cv_factor: 2.5 },
-        { label: "Diatómico (O2)", gamma: 1.4, cv_factor: 2.5 }
+        { label: isEn ? "Monatomic (He)" : "Monoatómico (He)", gamma: 1.67, cv_factor: 1.5 },
+        { label: isEn ? "Monatomic (Ar)" : "Monoatómico (Ar)", gamma: 1.67, cv_factor: 1.5 },
+        { label: isEn ? "Diatomic (N2)" : "Diatómico (N2)", gamma: 1.4, cv_factor: 2.5 },
+        { label: isEn ? "Diatomic (O2)" : "Diatómico (O2)", gamma: 1.4, cv_factor: 2.5 }
     ];
     const selectedGas = gas_info_options[Math.floor(Math.random() * gas_info_options.length)];
 
@@ -60,9 +61,20 @@ export const generateAdiabaticQuestion = (): GeneratedQuestion => {
         // Scenario: Calculate Final Temperature
         correctAnswer = parseFloat(temp_final_K.toFixed(1));
 
-        questionLatex = `Un gas ideal **${selectedGas.label}** a $${temperature_initial_C}^\\circ\\text{C}$ se comprime adiabáticamente desde $${volume_initial_L}$ L hasta un volumen final $V_f = ${volume_final_L}$ L. Calcule la temperatura final ($T_f$) en Kelvin.`;
+        questionLatex = isEn
+            ? `An ideal gas **${selectedGas.label}** at $${temperature_initial_C}^\\circ\\text{C}$ is compressed adiabatically from $${volume_initial_L}$ L to a final volume $V_f = ${volume_final_L}$ L. Calculate the final temperature ($T_f$) in Kelvin.`
+            : `Un gas ideal **${selectedGas.label}** a $${temperature_initial_C}^\\circ\\text{C}$ se comprime adiabáticamente desde $${volume_initial_L}$ L hasta un volumen final $V_f = ${volume_final_L}$ L. Calcule la temperatura final ($T_f$) en Kelvin.`;
 
-        explanation = `
+        explanation = isEn ? `
+1. **Identify data**: ${selectedGas.label} gas ($\\gamma = ${selectedGas.gamma}$).
+2. **Initial temperature**: $T_i = ${temperature_initial_C} + 273.15 = ${temp_initial_K.toFixed(2)} \\text{ K}$.
+3. **Adiabatic relation**: For an adiabatic process, $T_i V_i^{\\gamma-1} = T_f V_f^{\\gamma-1}$.
+4. **Solve for $T_f$**:
+   $$T_f = T_i \\left(\\frac{V_i}{V_f}\\right)^{\\gamma-1}$$
+5. **Substitution**:
+   $$T_f = ${temp_initial_K.toFixed(2)} \\left(\\frac{${volume_initial_L}}{${volume_final_L}}\\right)^{${(selectedGas.gamma - 1).toFixed(2)}}$$
+6. **Result**: $T_f = \\mathbf{${correctAnswer.toLocaleString()} \\text{ K}}$.
+    `.trim() : `
 1. **Identificar datos**: Gas ${selectedGas.label} ($\\gamma = ${selectedGas.gamma}$).
 2. **Temperatura inicial**: $T_i = ${temperature_initial_C} + 273.15 = ${temp_initial_K.toFixed(2)} \\text{ K}$.
 3. **Relación adiabática**: Para un proceso adiabático, $T_i V_i^{\\gamma-1} = T_f V_f^{\\gamma-1}$.
@@ -84,9 +96,19 @@ export const generateAdiabaticQuestion = (): GeneratedQuestion => {
         const work_joules = moles_n * cv * (temp_initial_K - temp_final_K);
         correctAnswer = parseFloat(work_joules.toFixed(0));
 
-        questionLatex = `$${moles_n}$ moles de un gas ideal **${selectedGas.label}** se comprimen adiabáticamente. La temperatura aumenta desde $${temperature_initial_C}^\\circ\\text{C}$ hasta una temperatura final de $${(temp_final_K - ABS_ZERO).toFixed(1)}^\\circ\\text{C}$. Calcule el trabajo ($W$) realizado por el gas.`;
+        questionLatex = isEn
+            ? `$${moles_n}$ moles of an ideal gas **${selectedGas.label}** are compressed adiabatically. The temperature increases from $${temperature_initial_C}^\\circ\\text{C}$ to a final temperature of $${(temp_final_K - ABS_ZERO).toFixed(1)}^\\circ\\text{C}$. Calculate the work ($W$) done by the gas.`
+            : `$${moles_n}$ moles de un gas ideal **${selectedGas.label}** se comprimen adiabáticamente. La temperatura aumenta desde $${temperature_initial_C}^\\circ\\text{C}$ hasta una temperatura final de $${(temp_final_K - ABS_ZERO).toFixed(1)}^\\circ\\text{C}$. Calcule el trabajo ($W$) realizado por el gas.`;
 
-        explanation = `
+        explanation = isEn ? `
+1. **Identify the process**: In an adiabatic process, $Q = 0$. By the First Law: $\\Delta U = Q - W \\rightarrow W = -\\Delta U$.
+2. **Internal Energy Change**: $\\Delta U = nC_v(T_f - T_i)$.
+3. **Calculate Work**: $W = -nC_v(T_f - T_i) = nC_v(T_i - T_f)$.
+4. **Data**: $n = ${moles_n}$, $C_v = ${selectedGas.cv_factor}R$, $T_i = ${temp_initial_K.toFixed(2)} \\text{ K}$, $T_f = ${temp_final_K.toFixed(2)} \\text{ K}$.
+5. **Substitution**:
+   $$W = (${moles_n}) (${selectedGas.cv_factor} \\times 8.314) (${temp_initial_K.toFixed(2)} - ${temp_final_K.toFixed(2)})$$
+6. **Result**: $W = \\mathbf{${correctAnswer.toLocaleString()} \\text{ J}}$. (The negative sign indicates work was done ON the gas).
+    `.trim() : `
 1. **Identificar el proceso**: En un proceso adiabático, $Q = 0$. Por la Primera Ley: $\\Delta U = Q - W \\rightarrow W = -\\Delta U$.
 2. **Cambio de Energía Interna**: $\\Delta U = nC_v(T_f - T_i)$.
 3. **Calcular Trabajo**: $W = -nC_v(T_f - T_i) = nC_v(T_i - T_f)$.

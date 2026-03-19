@@ -3,6 +3,8 @@ import { cn } from '../lib/utils'
 import { useAppStore } from '../store'
 import { Sidebar } from './Sidebar'
 import { AVATARS } from '../lib/constants'
+import { useTranslation } from 'react-i18next'
+import { Button } from './Button'
 
 interface MainLayoutProps {
     children: React.ReactNode
@@ -15,6 +17,11 @@ export const MainLayout = ({ children, className, showNav = true }: MainLayoutPr
     const currentView = useAppStore((state) => state.currentView)
     const userProfile = useAppStore((state) => state.userProfile)
     const streak = useAppStore((state) => state.streak)
+    const { t, i18n } = useTranslation()
+
+    const toggleLanguage = () => {
+        i18n.changeLanguage(i18n.language === 'es' ? 'en' : 'es')
+    }
     const isLegalView = currentView === 'privacy' || currentView === 'terms'
     const isAppView = (currentView === 'dashboard' || currentView === 'profile' || currentView === 'tools' || currentView === 'rankine' || currentView === 'interpolator' || currentView === 'unit-converter') && !isLegalView
 
@@ -45,17 +52,17 @@ export const MainLayout = ({ children, className, showNav = true }: MainLayoutPr
                                 className="flex items-center gap-2 group transition-all"
                             >
                                 <span className="material-symbols-outlined text-[#FF5722] text-xl">thermometer</span>
-                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#FF5722]/70 group-hover:text-[#FF5722]">Termo</span>
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#FF5722]/70 group-hover:text-[#FF5722]">{t('nav.termo')}</span>
                             </button>
 
                             <button className="flex items-center gap-2 opacity-30 cursor-not-allowed group">
                                 <span className="material-symbols-outlined text-[#0D47A1] text-xl">motion_photos_on</span>
-                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#0D47A1]">Dinámica</span>
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#0D47A1]">{t('nav.dinamica')}</span>
                             </button>
 
                             <button className="flex items-center gap-2 opacity-30 cursor-not-allowed group">
                                 <span className="material-symbols-outlined text-[#03A9F4] text-xl">account_tree</span>
-                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#03A9F4]">Estática</span>
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#03A9F4]">{t('nav.estatica')}</span>
                             </button>
 
                             <button
@@ -63,7 +70,7 @@ export const MainLayout = ({ children, className, showNav = true }: MainLayoutPr
                                 className="flex items-center gap-2 group relative transition-all"
                             >
                                 <span className="material-symbols-outlined text-white text-xl">handyman</span>
-                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white sparkle-text">Tools</span>
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white sparkle-text">{t('nav.tools')}</span>
                             </button>
                         </nav>
                     </div>
@@ -72,11 +79,21 @@ export const MainLayout = ({ children, className, showNav = true }: MainLayoutPr
                             <span className="text-xs text-zinc-300 font-bold uppercase">{userProfile.name}</span>
                             {streak > 1 && (
                                 <div className="flex items-center gap-1">
-                                    <span className="text-[9px] text-orange-500 font-black animate-pulse uppercase tracking-tighter">Flame Streak x{streak}</span>
+                                    <span className="text-[9px] text-orange-500 font-black animate-pulse uppercase tracking-tighter">
+                                        {t('common.streak', { streak })}
+                                    </span>
                                     <span className="material-symbols-outlined text-orange-500 text-[10px]" style={{ fontVariationSettings: "'FILL' 1" }}>local_fire_department</span>
                                 </div>
                             )}
                         </div>
+
+                        <Button
+                            variant="ghost"
+                            onClick={toggleLanguage}
+                            className="px-2 py-1 h-auto text-[10px] font-black border border-white/10 hover:bg-white/5 active:scale-95 transition-all text-zinc-400 hover:text-white"
+                        >
+                            {i18n.language.toUpperCase().split('-')[0]}
+                        </Button>
                         <div className="relative group">
                             <div
                                 onClick={() => setView('dashboard')}
@@ -114,10 +131,10 @@ export const MainLayout = ({ children, className, showNav = true }: MainLayoutPr
             {!isAppView && currentView !== 'quiz' && (
                 <footer className="relative z-20 py-8 px-6 border-t border-white/5 bg-black/20 mt-auto">
                     <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] uppercase font-bold tracking-widest text-zinc-600">
-                        <p>© {new Date().getFullYear()} SpeedSolver Engine. All Rights Reserved.</p>
+                        <p>© {new Date().getFullYear()} SpeedSolver Engine. {t('common.all_rights')}</p>
                         <div className="flex gap-6">
-                            <button onClick={() => setView('privacy')} className="hover:text-primary transition-colors">Privacy Policy</button>
-                            <button onClick={() => setView('terms')} className="hover:text-primary transition-colors">Terms of Service</button>
+                            <button onClick={() => setView('privacy')} className="hover:text-primary transition-colors">{t('common.privacy')}</button>
+                            <button onClick={() => setView('terms')} className="hover:text-primary transition-colors">{t('common.terms')}</button>
                         </div>
                     </div>
                 </footer>

@@ -42,7 +42,7 @@ export const PrivacyView = () => (
         <section className="space-y-4">
             <h2 className="text-white font-bold text-lg uppercase tracking-widest">2. Almacenamiento Local</h2>
             <p>
-                Utilizamos <strong>Local Storage</strong> del navegador única y exclusivamente para guardar tu progreso académico: rachas de estudio (streaks), número de ejercicios resueltos y configuraciones de perfil. Estos datos permanecen en tu dispositivo y no son almacenados en nuestros servidores.
+                Utilizamos <strong>Local Storage</strong> del navegador única y exclusivamente para guardar tu progreso académico: rachas de estudio, número de ejercicios resueltos y configuraciones de perfil. Estos datos permanecen en tu dispositivo y no son almacenados en nuestros servidores.
             </p>
         </section>
 

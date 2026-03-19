@@ -20,7 +20,8 @@ export interface GeneratedQuestion {
 /**
  * Generates a question about the Ideal Gas Law (PV=nRT)
  */
-export const generateIdealGasQuestion = (): GeneratedQuestion => {
+export const generateIdealGasQuestion = (lang: 'es' | 'en' = 'es'): GeneratedQuestion => {
+    const isEn = lang === 'en';
     // 1. Configuration & Constants
     const R = 0.08206;
     const ABS_ZERO = 273.15;
@@ -33,10 +34,10 @@ export const generateIdealGasQuestion = (): GeneratedQuestion => {
 
     // 3. Select Special Variable (Gas Context)
     const gas_context_options = [
-        { label: "Argón (Gas Ideal)", symbol: "Ar" },
-        { label: "Helio (Gas Ideal)", symbol: "He" },
-        { label: "Neón (Gas Ideal)", symbol: "Ne" },
-        { label: "Gas Desconocido", symbol: "X" }
+        { label: isEn ? "Argon (Ideal Gas)" : "Argón (Gas Ideal)", symbol: "Ar" },
+        { label: isEn ? "Helium (Ideal Gas)" : "Helio (Gas Ideal)", symbol: "He" },
+        { label: isEn ? "Neon (Ideal Gas)" : "Neón (Gas Ideal)", symbol: "Ne" },
+        { label: isEn ? "Unknown Gas" : "Gas Desconocido", symbol: "X" }
     ];
     const selectedGas = gas_context_options[Math.floor(Math.random() * gas_context_options.length)];
 
@@ -59,9 +60,18 @@ export const generateIdealGasQuestion = (): GeneratedQuestion => {
         correctAnswer = (moles_n * R * temp_K) / volume_L;
         correctAnswer = parseFloat(correctAnswer.toFixed(decimals));
 
-        questionLatex = `Un contenedor rígido de $${volume_L}$ L contiene $${moles_n}$ moles de **${selectedGas.label}** a una temperatura de $${temperature_C}^\\circ\\text{C}$. Calcule la presión que ejerce el gas.`;
+        questionLatex = isEn
+            ? `A rigid container of $${volume_L}$ L contains $${moles_n}$ moles of **${selectedGas.label}** at a temperature of $${temperature_C}^\\circ\\text{C}$. Calculate the pressure exerted by the gas.`
+            : `Un contenedor rígido de $${volume_L}$ L contiene $${moles_n}$ moles de **${selectedGas.label}** a una temperatura de $${temperature_C}^\\circ\\text{C}$. Calcule la presión que ejerce el gas.`;
 
-        explanation = `
+        explanation = isEn ? `
+1. **Convert Temperature**: $T = ${temperature_C} + 273.15 = ${temp_K.toFixed(2)} \\text{ K}$.
+2. **Ideal Gas Equation**: Solve for $P$ from $PV=nRT$:
+   $$P = \\frac{nRT}{V}$$
+3. **Substitution**:
+   $$P = \\frac{(${moles_n})(0.08206)(${temp_K.toFixed(2)})}{${volume_L}}$$
+4. **Result**: $P = ${correctAnswer} \\text{ atm}$.
+    `.trim() : `
 1. **Convertir Temperatura**: $T = ${temperature_C} + 273.15 = ${temp_K.toFixed(2)} \\text{ K}$.
 2. **Ecuación Gas Ideal**: Despejamos $P$ de $PV=nRT$:
    $$P = \\frac{nRT}{V}$$
@@ -81,9 +91,18 @@ export const generateIdealGasQuestion = (): GeneratedQuestion => {
         correctAnswer = (pressure_atm * volume_L) / (R * temp_K);
         correctAnswer = parseFloat(correctAnswer.toFixed(decimals));
 
-        questionLatex = `¿Cuántos moles de **${selectedGas.label}** son necesarios para llenar un tanque de $${volume_L}$ L a una presión de $${pressure_atm}$ atm y $${temperature_C}^\\circ\\text{C}$?`;
+        questionLatex = isEn
+            ? `How many moles of **${selectedGas.label}** are required to fill a $${volume_L}$ L tank at a pressure of $${pressure_atm}$ atm and $${temperature_C}^\\circ\\text{C}$?`
+            : `¿Cuántos moles de **${selectedGas.label}** son necesarios para llenar un tanque de $${volume_L}$ L a una presión de $${pressure_atm}$ atm y $${temperature_C}^\\circ\\text{C}$?`;
 
-        explanation = `
+        explanation = isEn ? `
+1. **Kelvin Temperature**: $T = ${temperature_C} + 273.15 = ${temp_K.toFixed(2)} \\text{ K}$.
+2. **Solve for n**: From $PV=nRT$, solve for $n$:
+   $$n = \\frac{PV}{RT}$$
+3. **Substitution**:
+   $$n = \\frac{(${pressure_atm})(${volume_L})}{(0.08206)(${temp_K.toFixed(2)})}$$
+4. **Result**: $n = ${correctAnswer} \\text{ mol}$.
+    `.trim() : `
 1. **Temperatura Kelvin**: $T = ${temperature_C} + 273.15 = ${temp_K.toFixed(2)} \\text{ K}$.
 2. **Despejar n**: De $PV=nRT$, despejamos $n$:
    $$n = \\frac{PV}{RT}$$

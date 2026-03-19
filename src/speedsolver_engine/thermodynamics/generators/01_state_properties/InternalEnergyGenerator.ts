@@ -20,7 +20,8 @@ export interface GeneratedQuestion {
 /**
  * Generates a question about Internal Energy (U)
  */
-export const generateEnergyQuestion = (): GeneratedQuestion => {
+export const generateEnergyQuestion = (lang: 'es' | 'en' = 'es'): GeneratedQuestion => {
+    const isEn = lang === 'en';
     // 1. Configuration & Constants
     const R = 8.314;
     const ABS_ZERO = 273.15;
@@ -31,10 +32,10 @@ export const generateEnergyQuestion = (): GeneratedQuestion => {
 
     // 3. Select Special Variable (Gas Type)
     const gas_info_options = [
-        { label: "Monoatómico (Helio)", f: 3 },
-        { label: "Monoatómico (Neón)", f: 3 },
-        { label: "Diatómico (Nitrógeno)", f: 5 },
-        { label: "Diatómico (Oxígeno)", f: 5 }
+        { label: isEn ? "Monatomic (Helium)" : "Monoatómico (Helio)", f: 3 },
+        { label: isEn ? "Monatomic (Neon)" : "Monoatómico (Neón)", f: 3 },
+        { label: isEn ? "Diatomic (Nitrogen)" : "Diatómico (Nitrógeno)", f: 5 },
+        { label: isEn ? "Diatomic (Oxygen)" : "Diatómico (Oxígeno)", f: 5 }
     ];
     const selectedGas = gas_info_options[Math.floor(Math.random() * gas_info_options.length)];
 
@@ -79,9 +80,18 @@ export const generateEnergyQuestion = (): GeneratedQuestion => {
     })).sort(() => Math.random() - 0.5);
 
     // 6. Format Question and Explanation (LaTeX)
-    const questionLatex = `Calcule la energía interna total ($U$) de $${moles_n}$ moles de un gas **${selectedGas.label}** a $${temperature_initial_C}^\\circ\\text{C}$.`;
+    const questionLatex = isEn
+        ? `Calculate the total internal energy ($U$) of $${moles_n}$ moles of a **${selectedGas.label}** gas at $${temperature_initial_C}^\\circ\\text{C}$.`
+        : `Calcule la energía interna total ($U$) de $${moles_n}$ moles de un gas **${selectedGas.label}** a $${temperature_initial_C}^\\circ\\text{C}$.`;
 
-    const explanation = `
+    const explanation = isEn ? `
+1. **Identify the gas**: The gas is ${selectedGas.label}, therefore, the degrees of freedom are $f = ${selectedGas.f}$.
+2. **Convert temperature**: $T = ${temperature_initial_C} + 273.15 = ${temp_K.toFixed(2)} \\text{ K}$.
+3. **Apply formula**: Internal energy is calculated as $U = \\frac{f}{2}nRT$.
+4. **Substitute values**: 
+   $$U = \\frac{${selectedGas.f}}{2} (${moles_n}) (8.314) (${temp_K.toFixed(2)})$$
+5. **Result**: $U = ${correctAnswer.toLocaleString()} \\text{ J}$.
+  `.trim() : `
 1. **Identificar el gas**: El gas es ${selectedGas.label}, por lo tanto, los grados de libertad son $f = ${selectedGas.f}$.
 2. **Convertir temperatura**: $T = ${temperature_initial_C} + 273.15 = ${temp_K.toFixed(2)} \\text{ K}$.
 3. **Aplicar fórmula**: La energía interna se calcula como $U = \\frac{f}{2}nRT$.

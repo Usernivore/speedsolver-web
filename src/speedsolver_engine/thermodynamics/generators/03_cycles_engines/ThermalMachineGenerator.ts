@@ -22,7 +22,8 @@ export interface GeneratedQuestion {
 /**
  * Generates a question about Thermal Engines or Refrigerators
  */
-export const generateMachineQuestion = (): GeneratedQuestion => {
+export const generateMachineQuestion = (lang: 'es' | 'en' = 'es'): GeneratedQuestion => {
+    const isEn = lang === 'en';
     // 1. Configuration & Constants
 
     // 2. Randomize Variables
@@ -32,10 +33,10 @@ export const generateMachineQuestion = (): GeneratedQuestion => {
 
     // 3. Select Machine Type and Scenario
     const machine_options = [
-        { label: "Motor a Gasolina", mode: "engine" },
-        { label: "Planta de Vapor", mode: "engine" },
-        { label: "Refrigerador Doméstico", mode: "fridge" },
-        { label: "Aire Acondicionado", mode: "fridge" }
+        { label: isEn ? "Gasoline Engine" : "Motor a Gasolina", mode: "engine" },
+        { label: isEn ? "Steam Plant" : "Planta de Vapor", mode: "engine" },
+        { label: isEn ? "Domestic Refrigerator" : "Refrigerador Doméstico", mode: "fridge" },
+        { label: isEn ? "Air Conditioner" : "Aire Acondicionado", mode: "fridge" }
     ];
 
     // Filter options based on scenario to ensure consistency
@@ -58,9 +59,16 @@ export const generateMachineQuestion = (): GeneratedQuestion => {
         const work_calc = heat_high_J * eff_decimal;
         correctAnswer = Math.round(heat_high_J - work_calc);
 
-        questionLatex = `Un **${selectedMachine.label}** tiene una eficiencia térmica del $${efficiency_percent}\\%$. Si recibe $${heat_high_J.toLocaleString()}$ J de calor de la fuente caliente ($Q_H$), ¿cuánto calor ($Q_L$) desecha al ambiente?`;
+        questionLatex = isEn
+            ? `A **${selectedMachine.label}** has a thermal efficiency of $${efficiency_percent}\\%$. If it receives $${heat_high_J.toLocaleString()}$ J of heat from the high-temperature source ($Q_H$), how much heat ($Q_L$) does it reject to the environment?`
+            : `Un **${selectedMachine.label}** tiene una eficiencia térmica del $${efficiency_percent}\\%$. Si recibe $${heat_high_J.toLocaleString()}$ J de calor de la fuente caliente ($Q_H$), ¿cuánto calor ($Q_L$) desecha al ambiente?`;
 
-        explanation = `
+        explanation = isEn ? `
+1. **Efficiency Definition**: $\\eta = \\frac{W}{Q_H} \\rightarrow W = \\eta \\cdot Q_H$.
+2. **Calculate Work**: $W = ${eff_decimal.toFixed(3)} \\times ${heat_high_J.toLocaleString()} = ${work_calc.toFixed(0)} \\text{ J}$.
+3. **Energy Balance** ($Q_H = W + Q_L$): Waste heat is the difference between absorbed heat and work performed: $Q_L = Q_H - W$.
+4. **Substitution**: $Q_L = ${heat_high_J.toLocaleString()} - ${work_calc.toFixed(0)} = \\mathbf{${correctAnswer.toLocaleString()} \\text{ J}}$.
+    `.trim() : `
 1. **Definición de Eficiencia**: $\\eta = \\frac{W}{Q_H} \\rightarrow W = \\eta \\cdot Q_H$.
 2. **Calcular Trabajo**: $W = ${eff_decimal.toFixed(3)} \\times ${heat_high_J.toLocaleString()} = ${work_calc.toFixed(0)} \\text{ J}$.
 3. **Balance de Energía** ($Q_H = W + Q_L$): El calor desechado es la diferencia entre el calor absorbido y el trabajo realizado: $Q_L = Q_H - W$.
@@ -78,9 +86,16 @@ export const generateMachineQuestion = (): GeneratedQuestion => {
         const heat_low_J = heat_high_J;
         correctAnswer = Math.round(heat_low_J / cop_value);
 
-        questionLatex = `Un **${selectedMachine.label}** opera con un Coeficiente de Desempeño (COP) de $${cop_value}$. Si se requiere extraer $${heat_low_J.toLocaleString()}$ J de calor del interior ($Q_L$), ¿cuánto trabajo eléctrico ($W$) consume?`;
+        questionLatex = isEn
+            ? `A **${selectedMachine.label}** operates with a Coefficient of Performance (COP) of $${cop_value}$. If it is required to extract $${heat_low_J.toLocaleString()}$ J of heat from the interior ($Q_L$), how much electrical work ($W$) does it consume?`
+            : `Un **${selectedMachine.label}** opera con un Coeficiente de Desempeño (COP) de $${cop_value}$. Si se requiere extraer $${heat_low_J.toLocaleString()}$ J de calor del interior ($Q_L$), ¿cuánto trabajo eléctrico ($W$) consume?`;
 
-        explanation = `
+        explanation = isEn ? `
+1. **COP Definition (Cooling)**: $COP = \\frac{Q_L}{W}$.
+2. **Solve for Work**: $W = \\frac{Q_L}{COP}$.
+3. **Substitution**: $W = \\frac{${heat_low_J.toLocaleString()}}{${cop_value}}$.
+4. **Result**: $W = \\mathbf{${correctAnswer.toLocaleString()} \\text{ J}}$.
+    `.trim() : `
 1. **Definición de COP (Refrigeración)**: $COP = \\frac{Q_L}{W}$.
 2. **Despejar Trabajo**: $W = \\frac{Q_L}{COP}$.
 3. **Sustitución**: $W = \\frac{${heat_low_J.toLocaleString()}}{${cop_value}}$.

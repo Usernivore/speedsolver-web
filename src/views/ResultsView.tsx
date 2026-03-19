@@ -2,12 +2,14 @@ import React, { useEffect } from 'react'
 import { useAppStore } from '../store'
 import { Button } from '../components/Button'
 import { formatDuration } from '../lib/utils'
+import { useTranslation } from 'react-i18next'
 
 export const ResultsView = () => {
-    const { score, totalQuestions, answers, setView, resetSession, saveSessionToHistory } = useAppStore()
+    const { score, totalQuestions, answers, setView, resetSession, accumulateSessionStats } = useAppStore()
+    const { t } = useTranslation()
 
     useEffect(() => {
-        saveSessionToHistory()
+        accumulateSessionStats()
     }, [])
 
     const answeredCount = answers.length
@@ -39,11 +41,11 @@ export const ResultsView = () => {
                     </div>
                 </div>
                 <div className="mt-6 text-center px-2">
-                    <h2 className="text-xl md:text-3xl font-black mb-2 text-white uppercase tracking-tight">Análisis de Misión</h2>
+                    <h2 className="text-xl md:text-3xl font-black mb-2 text-white uppercase tracking-tight">{t('results.mission_analysis')}</h2>
                     <div className="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-4 text-slate-500 text-[9px] md:text-xs font-mono uppercase tracking-widest">
-                        <p><span className="text-green-500">{score}</span> EXITOSAS // <span className="text-red-500">{answeredCount - score}</span> FALLIDAS</p>
+                        <p><span className="text-green-500">{score}</span> {t('results.success')} // <span className="text-red-500">{answeredCount - score}</span> {t('results.failed')}</p>
                         <span className="hidden md:block text-white/5">|</span>
-                        <p>OBJETIVO: {totalQuestions}</p>
+                        <p>{t('results.objective')}: {totalQuestions}</p>
                     </div>
                 </div>
             </section>
@@ -53,9 +55,9 @@ export const ResultsView = () => {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-white/[0.02] border-b border-white/5">
-                                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-400">Estado</th>
-                                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-400">Tema</th>
-                                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-400 text-right">Tiempo</th>
+                                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-400">{t('results.state')}</th>
+                                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-400">{t('results.topic')}</th>
+                                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-400 text-right">{t('results.time')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-white/5">
@@ -80,13 +82,13 @@ export const ResultsView = () => {
                     onClick={resetSession}
                     className="w-full sm:w-auto px-8 h-12 border border-white/20 hover:bg-white/5 rounded-lg text-sm font-bold tracking-wide transition-all uppercase text-white"
                 >
-                    Volver al Home
+                    {t('common.back_to_start')}
                 </button>
                 <Button
                     onClick={() => setView('dashboard')}
                     className="w-full sm:w-auto px-8 h-12 bg-accent-cyan text-zinc-900 hover:bg-accent-cyan/90 shadow-accent-cyan/20"
                 >
-                    Ver Dashboard
+                    {t('common.view_dashboard')}
                 </Button>
             </footer>
         </div>

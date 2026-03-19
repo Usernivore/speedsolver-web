@@ -31,7 +31,7 @@ export interface GeneratedQuestion {
     difficulty: "Easy" | "Medium" | "Hard";
 }
 
-type GeneratorFunction = () => GeneratedQuestion;
+type GeneratorFunction = (lang: 'es' | 'en') => GeneratedQuestion;
 
 /**
  * TOPIC_REGISTRY: Maps UI Topic IDs to their respective generator functions.
@@ -62,9 +62,10 @@ const TOPIC_REGISTRY: Record<string, GeneratorFunction[]> = {
  * 
  * @param selectedTopicIds - Array of topic keys (e.g., ["properties", "cycles"])
  * @param count - Total number of questions to generate
+ * @param lang - Target language ('es' | 'en')
  * @returns Array of GeneratedQuestion objects
  */
-export const generateSession = (selectedTopicIds: string[], count: number): GeneratedQuestion[] => {
+export const generateSession = (selectedTopicIds: string[], count: number, lang: 'es' | 'en' = 'es'): GeneratedQuestion[] => {
     let pool: GeneratorFunction[] = [];
 
     // 1. Determine which topics to include
@@ -88,7 +89,7 @@ export const generateSession = (selectedTopicIds: string[], count: number): Gene
     for (let i = 0; i < count; i++) {
         // Pick a random generator from the pool
         const randomGenerator = pool[Math.floor(Math.random() * pool.length)];
-        sessionQuestions.push(randomGenerator());
+        sessionQuestions.push(randomGenerator(lang));
     }
 
     return sessionQuestions;

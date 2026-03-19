@@ -4,6 +4,7 @@ import { useAppStore } from '../store'
 import { ProgressBar } from '../components/ProgressBar'
 import { Button } from '../components/Button'
 import { cn } from '../lib/utils'
+import { useTranslation } from 'react-i18next'
 import { MathText } from '../components/MathText'
 import { UtilitiesPanel } from '../components/UtilitiesPanel'
 
@@ -20,6 +21,7 @@ export const QuizView = () => {
         updateTimeRemaining,
         questions
     } = useAppStore()
+    const { t } = useTranslation()
 
     const [selectedOption, setSelectedOption] = useState<number | null>(null)
     const [isCorrect, setIsCorrect] = useState<boolean | null>(null)
@@ -134,7 +136,7 @@ export const QuizView = () => {
     }, [isPaused, hasAnswered, currentQuestionIndex, totalQuestions, currentQuestion])
 
     const formatTime = (seconds: number | null) => {
-        if (seconds === null) return 'ZEN MODE'
+        if (seconds === null) return t('quiz.zen_mode')
         const hrs = Math.floor(seconds / 3600)
         const mins = Math.floor((seconds % 3600) / 60)
         const secs = seconds % 60
@@ -150,7 +152,7 @@ export const QuizView = () => {
             <div className="flex h-screen w-full items-center justify-center bg-background-dark">
                 <div className="text-center space-y-4">
                     <div className="animate-spin size-10 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
-                    <p className="text-zinc-500 font-mono text-xs tracking-widest uppercase">Generando Escenario...</p>
+                    <p className="text-zinc-500 font-mono text-xs tracking-widest uppercase">{t('quiz.generating')}</p>
                 </div>
             </div>
         )
@@ -167,18 +169,18 @@ export const QuizView = () => {
                                 <span className="material-symbols-outlined text-primary text-5xl">pause</span>
                             </div>
                             <div>
-                                <h2 className="text-2xl font-bold text-white mb-2 uppercase tracking-tight">Sesión en Pausa</h2>
-                                <p className="text-zinc-400 text-sm font-light italic">Tómate un respiro, ingeniero.</p>
+                                <h2 className="text-2xl font-bold text-white mb-2 uppercase tracking-tight">{t('quiz.pause_title')}</h2>
+                                <p className="text-zinc-400 text-sm font-light italic">{t('quiz.pause_sub')}</p>
                             </div>
                             <div className="w-full space-y-4">
                                 <Button onClick={() => setIsPaused(false)} icon="play_arrow">
-                                    REANUDAR
+                                    {t('quiz.resume')}
                                 </Button>
                                 <button
                                     onClick={() => setView('setup')}
                                     className="w-full py-4 text-xs font-bold text-zinc-500 hover:text-white transition-all uppercase tracking-[0.2em] border border-white/5 hover:bg-white/5 rounded-lg"
                                 >
-                                    Salir de la Sesión
+                                    {t('quiz.exit_session')}
                                 </button>
                             </div>
                         </div>
@@ -189,7 +191,7 @@ export const QuizView = () => {
             <header className="flex flex-col md:flex-row items-center justify-between px-6 py-4 md:px-8 md:py-6 border-b border-white/5 bg-background-dark/50 backdrop-blur-md relative z-20 gap-4 md:gap-0">
                 <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
                     <div className="flex items-center gap-3">
-                        <span className="text-white/40 font-medium tracking-widest uppercase text-xs">Progress</span>
+                        <span className="text-white/40 font-medium tracking-widest uppercase text-xs">{t('quiz.progress')}</span>
                         <h2 className="text-lg md:text-xl font-bold tracking-tight text-white">Q {currentQuestionIndex + 1} / {totalQuestions}</h2>
                     </div>
                     {/* Compact stats for mobile header */}
@@ -199,7 +201,7 @@ export const QuizView = () => {
                 </div>
 
                 <div className="md:absolute md:left-1/2 md:-translate-x-1/2 flex flex-col items-center">
-                    <span className="text-[9px] md:text-[10px] uppercase tracking-[0.2em] text-white/30 mb-0.5 md:mb-1">Time Remaining</span>
+                    <span className="text-[9px] md:text-[10px] uppercase tracking-[0.2em] text-white/30 mb-0.5 md:mb-1">{t('quiz.time_remaining')}</span>
                     <div className={cn(
                         "text-xl md:text-3xl font-light font-mono",
                         timeLeft !== null && timeLeft < 60 ? "text-red-500 animate-pulse" : "text-white/50"
@@ -227,17 +229,17 @@ export const QuizView = () => {
                                 "flex-1 md:flex-none flex size-9 items-center justify-center rounded-lg border transition-all h-10 md:h-9",
                                 isUtilsOpen ? "bg-primary text-background-dark border-primary" : "bg-white/5 border-white/5 hover:bg-white/10 text-white/60"
                             )}
-                            title="Herramientas de Ingeniería (K)"
+                            title={`${t('nav.tools')} (K)`}
                         >
                             <span className="material-symbols-outlined text-lg">science</span>
-                            <span className="md:hidden ml-2 text-[10px] font-bold uppercase tracking-widest">Tools</span>
+                            <span className="md:hidden ml-2 text-[10px] font-bold uppercase tracking-widest">{t('nav.tools')}</span>
                         </button>
                         <button
                             onClick={() => setIsPaused(true)}
                             className="flex-1 md:flex-none flex size-9 items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 text-white/60 transition-colors h-10 md:h-9"
                         >
                             <span className="material-symbols-outlined text-lg">pause</span>
-                            <span className="md:hidden ml-2 text-[10px] font-bold uppercase tracking-widest">Pause</span>
+                            <span className="md:hidden ml-2 text-[10px] font-bold uppercase tracking-widest">{t('quiz.pause_button')}</span>
                         </button>
                     </div>
                 </div>
@@ -250,11 +252,11 @@ export const QuizView = () => {
                             <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:24px_24px]"></div>
                             <div className="flex flex-row md:flex-col items-center gap-4">
                                 <span className="material-symbols-outlined text-primary/20 text-4xl md:text-8xl">science</span>
-                                <span className="text-[9px] text-accent-cyan/40 font-mono tracking-widest uppercase">Scenario</span>
+                                <span className="text-[9px] text-accent-cyan/40 font-mono tracking-widest uppercase">{t('quiz.scenario')}</span>
                             </div>
                         </div>
                         <div className="flex-1 min-w-0 flex flex-col justify-center p-6 md:p-12 overflow-hidden">
-                            <span className="text-primary font-bold tracking-[0.3em] text-[10px] mb-3 md:mb-4 uppercase shrink-0">Intuition Drill // {currentQuestion.difficulty}</span>
+                            <span className="text-primary font-bold tracking-[0.3em] text-[10px] mb-3 md:mb-4 uppercase shrink-0">{t('quiz.drill_type')} // {currentQuestion.difficulty}</span>
                             <h1 className="text-sm md:text-lg lg:text-2xl font-medium leading-relaxed text-white/90 break-words [overflow-wrap:anywhere] [word-break:break-word] [hyphens:auto]">
                                 <MathText text={currentQuestion.questionLatex} />
                             </h1>
@@ -273,11 +275,11 @@ export const QuizView = () => {
                         <div className="flex items-start gap-3">
                             <span className="material-symbols-outlined mt-0.5">lightbulb</span>
                             <div className="space-y-1">
-                                <p className="text-xs font-bold uppercase tracking-widest opacity-60">Explicación</p>
+                                <p className="text-xs font-bold uppercase tracking-widest opacity-60">{t('quiz.explanation')}</p>
                                 <div className="text-sm leading-relaxed text-white/80">
                                     <MathText text={currentQuestion.explanation} />
                                 </div>
-                                <p className="text-[10px] pt-2 opacity-40 italic">Presiona ENTER para continuar</p>
+                                <p className="text-[10px] pt-2 opacity-40 italic">{t('quiz.continue_enter')}</p>
                             </div>
                         </div>
                     </div>

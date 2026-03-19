@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '../components/Button';
 import { useAppStore } from '../store';
 import { cn } from '../lib/utils';
+import { useTranslation } from 'react-i18next';
 
 type Category = 'Temperature' | 'Pressure' | 'Volume' | 'Energy';
 
@@ -11,36 +12,36 @@ interface UnitOption {
     factor?: number; // Multiplier relative to a base unit (not for temperature)
 }
 
-const UNITS: Record<Category, UnitOption[]> = {
+const getUnits = (t: any): Record<Category, UnitOption[]> => ({
     Temperature: [
-        { label: 'Celsius (°C)', value: 'C' },
-        { label: 'Fahrenheit (°F)', value: 'F' },
-        { label: 'Kelvin (K)', value: 'K' },
-        { label: 'Rankine (°R)', value: 'R' },
+        { label: t('unit_converter.units.celsius'), value: 'C' },
+        { label: t('unit_converter.units.fahrenheit'), value: 'F' },
+        { label: t('unit_converter.units.kelvin'), value: 'K' },
+        { label: t('unit_converter.units.rankine'), value: 'R' },
     ],
     Pressure: [
-        { label: 'Pascal (Pa)', value: 'Pa', factor: 1 },
-        { label: 'Kilopascal (kPa)', value: 'kPa', factor: 1000 },
-        { label: 'Megapascal (MPa)', value: 'MPa', factor: 1000000 },
-        { label: 'Bar (bar)', value: 'bar', factor: 100000 },
-        { label: 'Atmosphere (atm)', value: 'atm', factor: 101325 },
-        { label: 'PSI (psi)', value: 'psi', factor: 6894.76 },
+        { label: t('unit_converter.units.pascal'), value: 'Pa', factor: 1 },
+        { label: t('unit_converter.units.kilopascal'), value: 'kPa', factor: 1000 },
+        { label: t('unit_converter.units.megapascal'), value: 'MPa', factor: 1000000 },
+        { label: t('unit_converter.units.bar'), value: 'bar', factor: 100000 },
+        { label: t('unit_converter.units.atmosphere'), value: 'atm', factor: 101325 },
+        { label: t('unit_converter.units.psi'), value: 'psi', factor: 6894.76 },
     ],
     Volume: [
-        { label: 'Cubic Meter (m³)', value: 'm3', factor: 1 },
-        { label: 'Liter (L)', value: 'L', factor: 0.001 },
-        { label: 'Cubic Centimeter (cm³)', value: 'cm3', factor: 1e-6 },
-        { label: 'Gallon (gal)', value: 'gal', factor: 0.00378541 },
-        { label: 'Cubic Foot (ft³)', value: 'ft3', factor: 0.0283168 },
+        { label: t('unit_converter.units.cubic_meter'), value: 'm3', factor: 1 },
+        { label: t('unit_converter.units.liter'), value: 'L', factor: 0.001 },
+        { label: t('unit_converter.units.cubic_centimeter'), value: 'cm3', factor: 1e-6 },
+        { label: t('unit_converter.units.gallon'), value: 'gal', factor: 0.00378541 },
+        { label: t('unit_converter.units.cubic_foot'), value: 'ft3', factor: 0.0283168 },
     ],
     Energy: [
-        { label: 'Joule (J)', value: 'J', factor: 1 },
-        { label: 'Kilojoule (kJ)', value: 'kJ', factor: 1000 },
-        { label: 'Calorie (cal)', value: 'cal', factor: 4.184 },
-        { label: 'Kilocalorie (kcal)', value: 'kcal', factor: 4184 },
-        { label: 'BTU', value: 'BTU', factor: 1055.06 },
+        { label: t('unit_converter.units.joule'), value: 'J', factor: 1 },
+        { label: t('unit_converter.units.kilojoule'), value: 'kJ', factor: 1000 },
+        { label: t('unit_converter.units.calorie'), value: 'cal', factor: 4.184 },
+        { label: t('unit_converter.units.kilocalorie'), value: 'kcal', factor: 4184 },
+        { label: t('unit_converter.units.btu'), value: 'BTU', factor: 1055.06 },
     ],
-};
+});
 
 const convertTemperature = (value: number, from: string, to: string): number => {
     let celsius: number;
@@ -112,15 +113,18 @@ const CustomDropdown = ({ value, options, onChange }: { value: string, options: 
 
 export const UnitConverterView = () => {
     const setView = useAppStore((state) => state.setView);
+    const { t } = useTranslation();
     const [category, setCategory] = useState<Category>('Pressure');
+
+    const UNITS_REF = getUnits(t);
     const [inputValue, setInputValue] = useState<string>('1');
-    const [fromUnit, setFromUnit] = useState<string>(UNITS['Pressure'][0].value);
-    const [toUnit, setToUnit] = useState<string>(UNITS['Pressure'][1].value);
+    const [fromUnit, setFromUnit] = useState<string>(UNITS_REF['Pressure'][0].value);
+    const [toUnit, setToUnit] = useState<string>(UNITS_REF['Pressure'][1].value);
     const [result, setResult] = useState<number>(0);
 
     useEffect(() => {
-        setFromUnit(UNITS[category][0].value);
-        setToUnit(UNITS[category][1] ? UNITS[category][1].value : UNITS[category][0].value);
+        setFromUnit(UNITS_REF[category][0].value);
+        setToUnit(UNITS_REF[category][1] ? UNITS_REF[category][1].value : UNITS_REF[category][0].value);
     }, [category]);
 
     useEffect(() => {
@@ -133,8 +137,8 @@ export const UnitConverterView = () => {
         if (category === 'Temperature') {
             setResult(convertTemperature(val, fromUnit, toUnit));
         } else {
-            const fromFactor = UNITS[category].find(u => u.value === fromUnit)?.factor || 1;
-            const toFactor = UNITS[category].find(u => u.value === toUnit)?.factor || 1;
+            const fromFactor = UNITS_REF[category].find(u => u.value === fromUnit)?.factor || 1;
+            const toFactor = UNITS_REF[category].find(u => u.value === toUnit)?.factor || 1;
             setResult((val * fromFactor) / toFactor);
         }
     }, [inputValue, fromUnit, toUnit, category]);
@@ -166,11 +170,11 @@ export const UnitConverterView = () => {
                             <span className="material-symbols-outlined">arrow_back</span>
                         </Button>
                         <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-white uppercase italic">
-                            Conversor de <span className="text-primary">Unidades</span>
+                            {t('unit_converter.title').split(' ')[0]} <span className="text-primary">{t('unit_converter.title').split(' ')[1]}</span>
                         </h2>
                     </div>
-                    <p className="text-[10px] md:text-xs font-mono text-gray-500 uppercase tracking-[0.2em] ml-11">
-                        Engineering Toolbox // Multi-Unit Converter
+                    <p className="text-[10px] md:text-xs font-mono text-zinc-500 uppercase tracking-[0.2em] ml-11">
+                        {t('unit_converter.toolbox')}
                     </p>
                 </div>
             </div>
@@ -190,7 +194,7 @@ export const UnitConverterView = () => {
                             )}
                         >
                             <span className="material-symbols-outlined text-xl">{cat.icon}</span>
-                            <span className="text-[10px] font-black uppercase tracking-widest">{cat.id}</span>
+                            <span className="text-[10px] font-black uppercase tracking-widest">{t(`unit_converter.categories.${cat.id.toLowerCase()}`)}</span>
                         </button>
                     ))}
                 </div>
@@ -199,7 +203,7 @@ export const UnitConverterView = () => {
                     <div className="grid grid-cols-1 md:grid-cols-5 items-center gap-6">
                         {/* Input Component */}
                         <div className="md:col-span-2 space-y-3">
-                            <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-1">De Valor</label>
+                            <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-1">{t('unit_converter.from_value')}</label>
                             <div className="relative group">
                                 <input
                                     type="number"
@@ -214,7 +218,7 @@ export const UnitConverterView = () => {
                             </div>
                             <CustomDropdown
                                 value={fromUnit}
-                                options={UNITS[category]}
+                                options={UNITS_REF[category]}
                                 onChange={setFromUnit}
                             />
                         </div>
@@ -224,7 +228,7 @@ export const UnitConverterView = () => {
                             <button
                                 onClick={handleSwap}
                                 className="size-12 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center hover:bg-primary/20 hover:scale-110 active:scale-95 transition-all text-primary shadow-[0_0_15px_rgba(var(--primary-rgb),0.1)] group"
-                                title="Swap units"
+                                title={t('unit_converter.swap')}
                             >
                                 <span className="material-symbols-outlined group-hover:rotate-180 transition-transform duration-500">sync_alt</span>
                             </button>
@@ -232,7 +236,7 @@ export const UnitConverterView = () => {
 
                         {/* Result Component */}
                         <div className="md:col-span-2 space-y-3">
-                            <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-1">A Resultado</label>
+                            <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-1">{t('unit_converter.to_result')}</label>
                             <div className="relative group">
                                 <div className="w-full bg-primary/5 border border-primary/20 rounded-2xl p-5 min-h-[72px] flex items-center">
                                     <span className="text-2xl font-mono font-black text-white block overflow-hidden truncate">
@@ -245,7 +249,7 @@ export const UnitConverterView = () => {
                             </div>
                             <CustomDropdown
                                 value={toUnit}
-                                options={UNITS[category]}
+                                options={UNITS_REF[category]}
                                 onChange={setToUnit}
                             />
                         </div>
@@ -254,19 +258,19 @@ export const UnitConverterView = () => {
                     {/* Meta Info */}
                     <div className="pt-8 border-t border-white/5 grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div className="flex flex-col gap-1">
-                            <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Precisión del Motor</p>
-                            <p className="text-xs text-zinc-400 font-medium italic">Alta fidelidad (IEEE-754)</p>
+                            <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">{t('unit_converter.precision')}</p>
+                            <p className="text-xs text-zinc-400 font-medium italic">{t('unit_converter.high_fidelity')}</p>
                         </div>
                         <div className="flex flex-col gap-1">
-                            <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Base de Cálculo</p>
+                            <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">{t('unit_converter.calc_base')}</p>
                             <p className="text-xs text-zinc-400 font-medium italic truncate">
-                                {category === 'Temperature' ? 'Celsius Intermedio' : `Convertido vía ${UNITS[category].find(u => u.factor === 1)?.label || 'SI'}`}
+                                {category === 'Temperature' ? 'Celsius Intermedio' : `${t('unit_converter.units.cubic_meter')} via ${UNITS_REF[category].find(u => u.factor === 1)?.label || 'SI'}`}
                             </p>
                         </div>
                         <div className="flex flex-col gap-1 items-end">
                             <div className="flex items-center gap-2 px-3 py-1 bg-green-500/10 border border-green-500/20 rounded-full">
                                 <div className="size-1.5 rounded-full bg-green-500 animate-pulse" />
-                                <span className="text-[9px] font-black text-green-500 uppercase tracking-widest">Engine Live</span>
+                                <span className="text-[9px] font-black text-green-500 uppercase tracking-widest">{t('unit_converter.engine_live')}</span>
                             </div>
                         </div>
                     </div>
@@ -277,7 +281,7 @@ export const UnitConverterView = () => {
             <div className="p-4 bg-white/5 border border-white/10 rounded-2xl flex gap-4 items-center">
                 <span className="material-symbols-outlined text-zinc-400">info</span>
                 <p className="text-[11px] text-zinc-500 italic leading-relaxed">
-                    Tip: Haz clic en las flechas centrales para intercambiar unidades rápidamente. Los factores de conversión se basan en el sistema internacional de medidas.
+                    {t('unit_converter.hint')}
                 </p>
             </div>
         </div>

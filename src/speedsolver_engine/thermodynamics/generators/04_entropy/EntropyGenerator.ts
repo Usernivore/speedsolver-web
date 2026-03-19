@@ -22,7 +22,8 @@ export interface GeneratedQuestion {
 /**
  * Generates a question about Entropy and the 2nd Law
  */
-export const generateEntropyQuestion = (): GeneratedQuestion => {
+export const generateEntropyQuestion = (lang: 'es' | 'en' = 'es'): GeneratedQuestion => {
+    const isEn = lang === 'en';
     // 1. Configuration & Constants
     const R_JOULES = 8.314;
     const ABS_ZERO = 273.15;
@@ -37,9 +38,9 @@ export const generateEntropyQuestion = (): GeneratedQuestion => {
 
     // 3. Select Special Variable (Process Type)
     const process_options = [
-        { label: "Expansión Isotérmica", mode: "isothermal" },
-        { label: "Calentamiento Isocórico", mode: "isochoric", cv_factor: 1.5 },
-        { label: "Calentamiento Isobárico", mode: "isobaric", cp_factor: 2.5 }
+        { label: isEn ? "Isothermal Expansion" : "Expansión Isotérmica", mode: "isothermal" },
+        { label: isEn ? "Isochoric Heating" : "Calentamiento Isocórico", mode: "isochoric", cv_factor: 1.5 },
+        { label: isEn ? "Isobaric Heating" : "Calentamiento Isobárico", mode: "isobaric", cp_factor: 2.5 }
     ];
 
     // 4. Pick Scenario
@@ -68,14 +69,33 @@ export const generateEntropyQuestion = (): GeneratedQuestion => {
 
         correctAnswer = parseFloat(correctAnswer.toFixed(decimals));
 
-        questionLatex = `Calcule el cambio de entropía ($\\Delta S$) de $${moles_n}$ moles de gas ideal monoatómico durante un proceso de **${selectedProcess.label}**. `;
+        questionLatex = isEn
+            ? `Calculate the entropy change ($\\Delta S$) of $${moles_n}$ moles of a monatomic ideal gas during an **${selectedProcess.label}** process. `
+            : `Calcule el cambio de entropía ($\\Delta S$) de $${moles_n}$ moles de gas ideal monoatómico durante un proceso de **${selectedProcess.label}**. `;
+
         if (selectedProcess.mode === 'isothermal') {
-            questionLatex += `El gas se expande desde $${vol_initial_L}$ L hasta $${vol_final_L}$ L a una temperatura constante.`;
+            questionLatex += isEn
+                ? `The gas expands from $${vol_initial_L}$ L to $${vol_final_L}$ L at a constant temperature.`
+                : `El gas se expande desde $${vol_initial_L}$ L hasta $${vol_final_L}$ L a una temperatura constante.`;
         } else {
-            questionLatex += `La temperatura aumenta desde $${temp_initial_C}^\\circ\\text{C}$ hasta $${temp_final_C}^\\circ\\text{C}$.`;
+            questionLatex += isEn
+                ? `The temperature increases from $${temp_initial_C}^\\circ\\text{C}$ to $${temp_final_C}^\\circ\\text{C}$.`
+                : `La temperatura aumenta desde $${temp_initial_C}^\\circ\\text{C}$ hasta $${temp_final_C}^\\circ\\text{C}$.`;
         }
 
-        explanation = `
+        explanation = isEn ? `
+1. **Identify the process**: The process is **${selectedProcess.label}**.
+2. **Corresponding formula**:
+   ${selectedProcess.mode === 'isothermal' ? '- Isothermal: $\\Delta S = nR \\ln(V_f/V_i)$' : ''}
+   ${selectedProcess.mode === 'isochoric' ? '- Isochoric: $\\Delta S = nC_v \\ln(T_f/T_i)$' : ''}
+   ${selectedProcess.mode === 'isobaric' ? '- Isobaric: $\\Delta S = nC_p \\ln(T_f/T_i)$' : ''}
+3. **Calculation**:
+   ${selectedProcess.mode === 'isothermal'
+                ? `$$\\Delta S = (${moles_n})(8.314) \\ln\\left(\\frac{${vol_final_L}}{${vol_initial_L}}\\right)$$`
+                : `$$\\Delta S = (${moles_n})(${selectedProcess.mode === 'isochoric' ? '1.5' : '2.5'} \\times 8.314) \\ln\\left(\\frac{${tf_k.toFixed(2)}}{${ti_k.toFixed(2)}}\\right)$$`
+            }
+4. **Result**: $\\Delta S = \\mathbf{${correctAnswer} \\text{ J/K}}$.
+    `.trim() : `
 1. **Identificar el proceso**: El proceso es **${selectedProcess.label}**.
 2. **Fórmula correspondiente**:
    ${selectedProcess.mode === 'isothermal' ? '- Isotérmico: $\\Delta S = nR \\ln(V_f/V_i)$' : ''}
@@ -84,7 +104,7 @@ export const generateEntropyQuestion = (): GeneratedQuestion => {
 3. **Cálculo**:
    ${selectedProcess.mode === 'isothermal'
                 ? `$$\\Delta S = (${moles_n})(8.314) \\ln\\left(\\frac{${vol_final_L}}{${vol_initial_L}}\\right)$$`
-                : `$$\\Delta S = (${moles_n})(${selectedProcess.mode === 'isochoric' ? '1.5' : '2.5'} \\times 8.314) \\ln\\left(\\frac{${tf_k.toFixed(2)}}{${ti_k.toFixed(2)}}\\right)$$`
+                : `$$\\Delta S = (${moles_n})(${selectedProcess.mode === 'isocoric' ? '1.5' : '2.5'} \\times 8.314) \\ln\\left(\\frac{${tf_k.toFixed(2)}}{${ti_k.toFixed(2)}}\\right)$$`
             }
 4. **Resultado**: $\\Delta S = \\mathbf{${correctAnswer} \\text{ J/K}}$.
     `.trim();
@@ -98,9 +118,18 @@ export const generateEntropyQuestion = (): GeneratedQuestion => {
         const t_source_k = temp_final_C + ABS_ZERO;
         correctAnswer = parseFloat((-1 * (heat_joules_input / t_source_k)).toFixed(decimals));
 
-        questionLatex = `Una fuente térmica a $${temp_final_C}^\\circ\\text{C}$ transfiere $${heat_joules_input.toLocaleString()}$ J de calor a un sistema. Calcule el cambio de entropía de la **fuente**.`;
+        questionLatex = isEn
+            ? `A thermal source at $${temp_final_C}^\\circ\\text{C}$ transfers $${heat_joules_input.toLocaleString()}$ J of heat to a system. Calculate the entropy change of the **source**.`
+            : `Una fuente térmica a $${temp_final_C}^\\circ\\text{C}$ transfiere $${heat_joules_input.toLocaleString()}$ J de calor a un sistema. Calcule el cambio de entropía de la **fuente**.`;
 
-        explanation = `
+        explanation = isEn ? `
+1. **Identify heat flow**: The source gives heat to the system, therefore $Q_{\\text{source}}$ is negative ($Q = -${heat_joules_input} \\text{ J}$).
+2. **Convert temperature**: $T = ${temp_final_C} + 273.15 = ${t_source_k.toFixed(2)} \\text{ K}$.
+3. **Entropy formula**: For a thermal source (constant temperature), $\\Delta S = \\frac{Q}{T}$.
+4. **Calculation**:
+   $$\\Delta S = \\frac{-${heat_joules_input}}{${t_source_k.toFixed(2)}}$$
+5. **Result**: $\\Delta S = \\mathbf{${correctAnswer} \\text{ J/K}}$. (The negative value indicates that the entropy of the source decreases).
+    `.trim() : `
 1. **Identificar flujo de calor**: La fuente cede calor al sistema, por lo tanto, $Q_{\\text{fuente}}$ es negativo ($Q = -${heat_joules_input} \\text{ J}$).
 2. **Convertir temperatura**: $T = ${temp_final_C} + 273.15 = ${t_source_k.toFixed(2)} \\text{ K}$.
 3. **Fórmula de entropía**: Para una fuente térmica (temperatura constante), $\\Delta S = \\frac{Q}{T}$.

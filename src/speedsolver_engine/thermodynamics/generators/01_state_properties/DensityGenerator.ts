@@ -21,7 +21,8 @@ export interface GeneratedQuestion {
 /**
  * Generates a question about Gas Density or Molar Mass
  */
-export const generateDensityQuestion = (): GeneratedQuestion => {
+export const generateDensityQuestion = (lang: 'es' | 'en' = 'es'): GeneratedQuestion => {
+    const isEn = lang === 'en';
     // 1. Configuration & Constants
     const R = 0.08206;
     const ABS_ZERO = 273.15;
@@ -34,11 +35,11 @@ export const generateDensityQuestion = (): GeneratedQuestion => {
 
     // 3. Select Special Variable (Gas Data)
     const gas_data_options = [
-        { label: "Helio (He)", mm: 4.0 },
-        { label: "Metano (CH4)", mm: 16.0 },
-        { label: "Nitrógeno (N2)", mm: 28.0 },
-        { label: "Oxígeno (O2)", mm: 32.0 },
-        { label: "Dióxido de Carbono (CO2)", mm: 44.0 }
+        { label: isEn ? "Helium (He)" : "Helio (He)", mm: 4.0 },
+        { label: isEn ? "Methane (CH4)" : "Metano (CH4)", mm: 16.0 },
+        { label: isEn ? "Nitrogen (N2)" : "Nitrógeno (N2)", mm: 28.0 },
+        { label: isEn ? "Oxygen (O2)" : "Oxígeno (O2)", mm: 32.0 },
+        { label: isEn ? "Carbon Dioxide (CO2)" : "Dióxido de Carbono (CO2)", mm: 44.0 }
     ];
     const selectedGas = gas_data_options[Math.floor(Math.random() * gas_data_options.length)];
 
@@ -61,9 +62,19 @@ export const generateDensityQuestion = (): GeneratedQuestion => {
         correctAnswer = (pressure_atm * selectedGas.mm) / (R * temp_K);
         correctAnswer = parseFloat(correctAnswer.toFixed(decimals));
 
-        questionLatex = `Calcule la densidad (en g/L) del **${selectedGas.label}** a una presión de $${pressure_atm}$ atm y una temperatura de $${temperature_C}^\\circ\\text{C}$.`;
+        questionLatex = isEn
+            ? `Calculate the density (in g/L) of **${selectedGas.label}** at a pressure of $${pressure_atm}$ atm and a temperature of $${temperature_C}^\\circ\\text{C}$.`
+            : `Calcule la densidad (en g/L) del **${selectedGas.label}** a una presión de $${pressure_atm}$ atm y una temperatura de $${temperature_C}^\\circ\\text{C}$.`;
 
-        explanation = `
+        explanation = isEn ? `
+1. **Identify data**: Gas ${selectedGas.label} ($MM = ${selectedGas.mm} \\text{ g/mol}$).
+2. **Kelvin temperature**: $T = ${temperature_C} + 273.15 = ${temp_K.toFixed(2)} \\text{ K}$.
+3. **Derived formula ($PM=\\rho RT$)**:
+   $$\\rho = \\frac{P \\cdot MM}{R \\cdot T}$$
+4. **Substitution**:
+   $$\\rho = \\frac{(${pressure_atm})(${selectedGas.mm})}{(0.08206)(${temp_K.toFixed(2)})}$$
+5. **Result**: $\\rho = ${correctAnswer} \\text{ g/L}$.
+    `.trim() : `
 1. **Identificar datos**: Gas ${selectedGas.label} ($MM = ${selectedGas.mm} \\text{ g/mol}$).
 2. **Temperatura Kelvin**: $T = ${temperature_C} + 273.15 = ${temp_K.toFixed(2)} \\text{ K}$.
 3. **Fórmula derivada ($PM=\\rho RT$)**:
@@ -84,9 +95,17 @@ export const generateDensityQuestion = (): GeneratedQuestion => {
         correctAnswer = (mass_grams * R * temp_K) / (pressure_atm * volume_L);
         correctAnswer = parseFloat(correctAnswer.toFixed(decimals));
 
-        questionLatex = `Una muestra de $${mass_grams}$ g de un gas desconocido ocupa $${volume_L}$ L a $${pressure_atm}$ atm y $${temperature_C}^\\circ\\text{C}$. Calcule su Masa Molar para identificarlo.`;
+        questionLatex = isEn
+            ? `A sample of $${mass_grams}$ g of an unknown gas occupies $${volume_L}$ L at $${pressure_atm}$ atm and $${temperature_C}^\\circ\\text{C}$. Calculate its Molar Mass to identify it.`
+            : `Una muestra de $${mass_grams}$ g de un gas desconocido ocupa $${volume_L}$ L a $${pressure_atm}$ atm y $${temperature_C}^\\circ\\text{C}$. Calcule su Masa Molar para identificarlo.`;
 
-        explanation = `
+        explanation = isEn ? `
+1. **Kelvin temperature**: $T = ${temperature_C} + 273.15 = ${temp_K.toFixed(2)} \\text{ K}$.
+2. **Base equation**: $PV = \\frac{m}{MM}RT \\rightarrow MM = \\frac{mRT}{PV}$.
+3. **Substitution**:
+   $$MM = \\frac{(${mass_grams})(0.08206)(${temp_K.toFixed(2)})}{(${pressure_atm})(${volume_L})}$$
+4. **Result**: $MM = ${correctAnswer} \\text{ g/mol}$.
+    `.trim() : `
 1. **Temperatura Kelvin**: $T = ${temperature_C} + 273.15 = ${temp_K.toFixed(2)} \\text{ K}$.
 2. **Ecuación base**: $PV = \\frac{m}{MM}RT \\rightarrow MM = \\frac{mRT}{PV}$.
 3. **Sustitución**:

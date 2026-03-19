@@ -22,7 +22,8 @@ export interface GeneratedQuestion {
 /**
  * Generates a question about Isochoric Processes
  */
-export const generateIsochoricQuestion = (): GeneratedQuestion => {
+export const generateIsochoricQuestion = (lang: 'es' | 'en' = 'es'): GeneratedQuestion => {
+    const isEn = lang === 'en';
     // 1. Configuration & Constants
     const R_JOULES = 8.314;
     const ATM_L_TO_J = 101.325;
@@ -35,10 +36,10 @@ export const generateIsochoricQuestion = (): GeneratedQuestion => {
 
     // 3. Select Special Variable (Gas Info)
     const gas_info_options = [
-        { label: "Monoatómico (He)", f: 3, cv_factor: 1.5 },
-        { label: "Monoatómico (Ne)", f: 3, cv_factor: 1.5 },
-        { label: "Diatómico (N2)", f: 5, cv_factor: 2.5 },
-        { label: "Diatómico (O2)", f: 5, cv_factor: 2.5 }
+        { label: isEn ? "Monatomic (He)" : "Monoatómico (He)", f: 3, cv_factor: 1.5 },
+        { label: isEn ? "Monatomic (Ne)" : "Monoatómico (Ne)", f: 3, cv_factor: 1.5 },
+        { label: isEn ? "Diatomic (N2)" : "Diatómico (N2)", f: 5, cv_factor: 2.5 },
+        { label: isEn ? "Diatomic (O2)" : "Diatómico (O2)", f: 5, cv_factor: 2.5 }
     ];
     const selectedGas = gas_info_options[Math.floor(Math.random() * gas_info_options.length)];
 
@@ -55,9 +56,16 @@ export const generateIsochoricQuestion = (): GeneratedQuestion => {
         // Scenario: Calculate Work
         correctAnswer = 0;
 
-        questionLatex = `Un contenedor rígido de $${volume_L}$ L contiene gas a $${pressure_initial_atm}$ atm. Se calienta hasta que la presión sube a $${pressure_final_atm}$ atm. Calcule el trabajo ($W$) realizado por el gas.`;
+        questionLatex = isEn
+            ? `A rigid container of $${volume_L}$ L contains gas at $${pressure_initial_atm}$ atm. It is heated until the pressure rises to $${pressure_final_atm}$ atm. Calculate the work ($W$) done by the gas.`
+            : `Un contenedor rígido de $${volume_L}$ L contiene gas a $${pressure_initial_atm}$ atm. Se calienta hasta que la presión sube a $${pressure_final_atm}$ atm. Calcule el trabajo ($W$) realizado por el gas.`;
 
-        explanation = `
+        explanation = isEn ? `
+1. **Identify the process**: A rigid container implies that the volume is constant ($\\Delta V = 0$).
+2. **Definition of Work**: Thermodynamic work is defined as $W = \\int P dV$.
+3. **Analysis**: Since the volume does not change ($dV = 0$), there is no displacement of the system boundary.
+4. **Result**: Therefore, the work done is $W = \\mathbf{0 \\text{ J}}$.
+    `.trim() : `
 1. **Identificar el proceso**: Un contenedor rígido implica que el volumen es constante ($\\Delta V = 0$).
 2. **Definición de Trabajo**: El trabajo termodinámico se define como $W = \\int P dV$.
 3. **Análisis**: Como el volumen no cambia ($dV = 0$), no hay desplazamiento de la frontera del sistema.
@@ -74,14 +82,23 @@ export const generateIsochoricQuestion = (): GeneratedQuestion => {
         const cv = selectedGas.cv_factor * R_JOULES;
         correctAnswer = parseFloat((moles_n * cv * delta_T).toFixed(1));
 
-        questionLatex = `Calcule el calor ($Q$) requerido para calentar isocóricamente $${moles_n}$ moles de **${selectedGas.label}** desde 300 K hasta 500 K.`;
+        questionLatex = isEn
+            ? `Calculate the heat ($Q$) required to heat $${moles_n}$ moles of **${selectedGas.label}** isochorically from 300 K to 500 K.`
+            : `Calcule el calor ($Q$) requerido para calentar isocóricamente $${moles_n}$ moles de **${selectedGas.label}** desde 300 K hasta 500 K.`;
 
-        explanation = `
+        explanation = isEn ? `
+1. **Identify the process**: In an isochoric process ($V$ constant), the heat transferred is equal to the change in internal energy: $Q = \\Delta U = nC_v\\Delta T$.
+2. **Determine $C_v$**: For a ${selectedGas.label} gas ($f=${selectedGas.f}$), the constant volume specific heat is $C_v = \\frac{f}{2}R = ${selectedGas.cv_factor}R$.
+3. **Calculate $\\Delta T$**: $\\Delta T = 500 \\text{ K} - 300 \\text{ K} = 200 \\text{ K}$.
+4. **Substitution**:
+   $$Q = (${moles_n}) (${selectedGas.cv_factor} \\times 8.314) (${delta_T})$$
+5. **Result**: $Q = \\mathbf{${correctAnswer.toLocaleString()} \\text{ J}}$.
+    `.trim() : `
 1. **Identificar el proceso**: En un proceso isocórico ($V$ constante), el calor transferido es igual al cambio en la energía interna: $Q = \\Delta U = nC_v\\Delta T$.
 2. **Determinar $C_v$**: Para un gas ${selectedGas.label} ($f=${selectedGas.f}$), el calor específico es $C_v = \\frac{f}{2}R = ${selectedGas.cv_factor}R$.
 3. **Calcular $\\Delta T$**: $\\Delta T = 500 \\text{ K} - 300 \\text{ K} = 200 \\text{ K}$.
 4. **Sustitución**:
-   $$Q = (${moles_n})(${selectedGas.cv_factor} \\times 8.314)(${delta_T})$$
+   $$Q = (${moles_n}) (${selectedGas.cv_factor} \\times 8.314) (${delta_T})$$
 5. **Resultado**: $Q = \\mathbf{${correctAnswer.toLocaleString()} \\text{ J}}$.
     `.trim();
 

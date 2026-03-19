@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { cn, linearInterpolate } from '../lib/utils';
 import { Button } from '../components/Button';
 import { useAppStore } from '../store';
+import { useTranslation } from 'react-i18next';
 
 export const InterpolatorView = () => {
     const setView = useAppStore((state) => state.setView);
+    const { t } = useTranslation();
 
     // Linear Interpolator State
     const [x0, setX0] = useState('');
@@ -31,7 +33,7 @@ export const InterpolatorView = () => {
 
         if (Math.abs(vx1 - vx0) < 1e-10) {
             setResult(null);
-            setError("Error: X1 no puede ser igual a X0 (división por cero)");
+            setError(t('interpolator.error_divide_zero'));
             return;
         }
 
@@ -69,11 +71,11 @@ export const InterpolatorView = () => {
                             <span className="material-symbols-outlined">arrow_back</span>
                         </Button>
                         <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-white uppercase italic">
-                            Interpolador <span className="text-primary">Lineal</span>
+                            {t('interpolator.title').split(' ')[0]} <span className="text-primary">{t('interpolator.title').split(' ')[1]}</span>
                         </h2>
                     </div>
-                    <p className="text-[10px] md:text-xs font-mono text-gray-500 uppercase tracking-[0.2em] ml-11">
-                        Engineering Toolbox // Math Utility
+                    <p className="text-[10px] md:text-xs font-mono text-zinc-500 uppercase tracking-[0.2em] ml-11">
+                        {t('interpolator.math_utility')}
                     </p>
                 </div>
 
@@ -82,7 +84,7 @@ export const InterpolatorView = () => {
                     onClick={clearCalculator}
                     className="text-[10px] uppercase font-black tracking-widest border-white/10 hover:bg-white/5"
                 >
-                    Reiniciar Campos
+                    {t('interpolator.reset')}
                 </Button>
             </div>
 
@@ -93,7 +95,7 @@ export const InterpolatorView = () => {
 
                         {/* Formula Display */}
                         <div className="flex flex-col items-center justify-center p-6 bg-black/20 rounded-xl border border-white/5 space-y-4">
-                            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em]">Fórmula Utilizada</p>
+                            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em]">{t('interpolator.formula')}</p>
                             <div className="flex items-center gap-3 text-lg md:text-2xl font-medium text-primary/90 select-none">
                                 <span className="font-serif italic">y = y<sub className="text-xs">0</sub> +</span>
                                 <div className="flex flex-col items-center">
@@ -112,7 +114,7 @@ export const InterpolatorView = () => {
                             <div className="space-y-4">
                                 <h3 className="text-[11px] font-black text-zinc-400 uppercase tracking-widest flex items-center gap-2">
                                     <span className="size-5 rounded bg-white/5 flex items-center justify-center text-[10px] text-primary">01</span>
-                                    Punto Conocido 0 (x₀, y₀)
+                                    {t('interpolator.point0')}
                                 </h3>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
@@ -142,7 +144,7 @@ export const InterpolatorView = () => {
                             <div className="space-y-4">
                                 <h3 className="text-[11px] font-black text-zinc-400 uppercase tracking-widest flex items-center gap-2">
                                     <span className="size-5 rounded bg-white/5 flex items-center justify-center text-[10px] text-primary">02</span>
-                                    Punto Conocido 1 (x₁, y₁)
+                                    {t('interpolator.point1')}
                                 </h3>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
@@ -173,7 +175,7 @@ export const InterpolatorView = () => {
                         <div className="pt-6 border-t border-white/5">
                             <div className="max-w-md mx-auto space-y-4">
                                 <h3 className="text-[11px] font-black text-accent-cyan uppercase tracking-[0.3em] text-center">
-                                    Valor a Interpolar (x)
+                                    {t('interpolator.target_x')}
                                 </h3>
                                 <div className="relative">
                                     <input
@@ -181,7 +183,7 @@ export const InterpolatorView = () => {
                                         value={targetX}
                                         onChange={e => setTargetX(e.target.value)}
                                         className="w-full bg-zinc-900 border-2 border-accent-cyan/20 rounded-2xl p-5 text-lg font-mono text-white outline-none focus:border-accent-cyan transition-all text-center shadow-[0_0_20px_rgba(34,211,238,0.05)]"
-                                        placeholder="Ingrese el valor de x buscado"
+                                        placeholder={t('interpolator.placeholder_x')}
                                     />
                                     <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
                                         <span className="material-symbols-outlined text-accent-cyan/40">target</span>
@@ -204,7 +206,7 @@ export const InterpolatorView = () => {
                         {result !== null ? (
                             <div className="bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 rounded-2xl p-8 flex flex-col items-center justify-center space-y-2 animate-in zoom-in-95 duration-500 shadow-2xl relative overflow-hidden">
                                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-from)_0%,_transparent_70%)] opacity-20" />
-                                <p className="text-xs font-black text-primary uppercase tracking-[0.4em] relative z-10">Resultado Calculado (y)</p>
+                                <p className="text-xs font-black text-primary uppercase tracking-[0.4em] relative z-10">{t('interpolator.result_y')}</p>
                                 <div className="flex items-baseline gap-3 relative z-10">
                                     <span className="text-6xl font-black text-white tracking-tighter drop-shadow-2xl">
                                         {result}
@@ -212,13 +214,13 @@ export const InterpolatorView = () => {
                                 </div>
                                 <div className="flex items-center gap-2 pt-2 relative z-10">
                                     <div className="size-1.5 rounded-full bg-primary animate-pulse" />
-                                    <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Precisión: 6 decimales</p>
+                                    <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">{t('interpolator.precision_desc')}</p>
                                 </div>
                             </div>
                         ) : (
                             <div className="h-40 border-2 border-dashed border-white/5 rounded-2xl flex flex-col items-center justify-center text-center p-6 space-y-2">
                                 <span className="material-symbols-outlined text-4xl text-zinc-800">calculate</span>
-                                <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Complete todos los campos para ver el resultado</p>
+                                <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">{t('interpolator.complete_fields')}</p>
                             </div>
                         )}
                     </div>
@@ -229,7 +231,7 @@ export const InterpolatorView = () => {
             <div className="p-4 bg-white/5 border border-white/10 rounded-xl flex gap-4 items-center">
                 <span className="material-symbols-outlined text-zinc-400">help_outline</span>
                 <p className="text-[11px] text-zinc-500 italic leading-relaxed">
-                    La interpolación lineal asume que la tasa de cambio entre los dos puntos conocidos es constante. Es ideal para lecturas rápidas de tablas termodinámicas de vapor o gases.
+                    {t('interpolator.hint')}
                 </p>
             </div>
         </div>

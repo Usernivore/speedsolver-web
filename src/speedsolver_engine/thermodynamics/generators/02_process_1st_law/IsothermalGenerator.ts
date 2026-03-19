@@ -22,7 +22,8 @@ export interface GeneratedQuestion {
 /**
  * Generates a question about Isothermal Processes
  */
-export const generateIsothermalQuestion = (): GeneratedQuestion => {
+export const generateIsothermalQuestion = (lang: 'es' | 'en' = 'es'): GeneratedQuestion => {
+    const isEn = lang === 'en';
     // 1. Configuration & Constants
     const R_JOULES = 8.314;
     const ABS_ZERO = 273.15;
@@ -49,9 +50,18 @@ export const generateIsothermalQuestion = (): GeneratedQuestion => {
         // Scenario: Calculate Work
         correctAnswer = parseFloat(work_val.toFixed(0));
 
-        questionLatex = `$${moles_n}$ moles de un gas ideal se expanden isotérmicamente a $${temperature_C}^\\circ\\text{C}$. El volumen aumenta de $${vol_initial_L}$ L a un volumen final $V_f$ que es $${expansion_ratio}$ veces el inicial. Calcule el trabajo ($W$).`;
+        questionLatex = isEn
+            ? `$${moles_n}$ moles of an ideal gas expand isothermally at $${temperature_C}^\\circ\\text{C}$. The volume increases from $${vol_initial_L}$ L to a final volume $V_f$ that is $${expansion_ratio}$ times the initial one. Calculate the work ($W$).`
+            : `$${moles_n}$ moles de un gas ideal se expanden isotérmicamente a $${temperature_C}^\\circ\\text{C}$. El volumen aumenta de $${vol_initial_L}$ L a un volumen final $V_f$ que es $${expansion_ratio}$ veces el inicial. Calcule el trabajo ($W$).`;
 
-        explanation = `
+        explanation = isEn ? `
+1. **Kelvin Temperature**: $T = ${temperature_C} + 273.15 = ${temp_K.toFixed(2)} \\text{ K}$.
+2. **Isothermal Work Formula**: For an ideal gas, $W = nRT \\ln\\left(\\frac{V_f}{V_i}\\right)$.
+3. **Volume Ratio**: We are told that $\\frac{V_f}{V_i} = ${expansion_ratio}$.
+4. **Cálculo**:
+   $$W = (${moles_n})(8.314)(${temp_K.toFixed(2)}) \\ln(${expansion_ratio})$$
+5. **Result**: $W = \\mathbf{${correctAnswer.toLocaleString()} \\text{ J}}$.
+    `.trim() : `
 1. **Temperatura Kelvin**: $T = ${temperature_C} + 273.15 = ${temp_K.toFixed(2)} \\text{ K}$.
 2. **Fórmula de Trabajo Isotérmico**: Para un gas ideal, $W = nRT \\ln\\left(\\frac{V_f}{V_i}\\right)$.
 3. **Relación de volumen**: Se nos indica que $\\frac{V_f}{V_i} = ${expansion_ratio}$.
@@ -69,9 +79,16 @@ export const generateIsothermalQuestion = (): GeneratedQuestion => {
         correctAnswer = 0;
         const displayWork = Math.round(work_val);
 
-        questionLatex = `En una expansión isotérmica, un gas realiza $${displayWork.toLocaleString()}$ J de trabajo. ¿Cuál es el cambio en su energía interna ($\\Delta U$)?`;
+        questionLatex = isEn
+            ? `In an isothermal expansion, a gas performs $${displayWork.toLocaleString()}$ J of work. What is the change in its internal energy ($\\Delta U$)?`
+            : `En una expansión isotérmica, un gas realiza $${displayWork.toLocaleString()}$ J de trabajo. ¿Cuál es el cambio en su energía interna ($\\Delta U$)?`;
 
-        explanation = `
+        explanation = isEn ? `
+1. **Definition**: An isothermal process implies that the temperature remains constant ($\\Delta T = 0$).
+2. **Internal Energy**: For an ideal gas, internal energy depends only on temperature ($U \\propto T$).
+3. **Conclusion**: Since temperature does not change, internal energy does not change, regardless of work performed or heat transferred.
+4. **Result**: $\\Delta U = \\mathbf{0 \\text{ J}}$.
+    `.trim() : `
 1. **Definición**: Un proceso isotérmico implica que la temperatura permanece constante ($\\Delta T = 0$).
 2. **Energía Interna**: Para un gas ideal, la energía interna depende exclusivamente de la temperatura ($U \\propto T$).
 3. **Conclusión**: Si la temperatura no cambia, la energía interna tampoco cambia, independientemente del trabajo realizado o el calor transferido.

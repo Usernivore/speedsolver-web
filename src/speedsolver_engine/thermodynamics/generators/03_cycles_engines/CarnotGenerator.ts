@@ -22,7 +22,8 @@ export interface GeneratedQuestion {
 /**
  * Generates a question about the Carnot Cycle
  */
-export const generateCarnotQuestion = (): GeneratedQuestion => {
+export const generateCarnotQuestion = (lang: 'es' | 'en' = 'es'): GeneratedQuestion => {
+    const isEn = lang === 'en';
     // 1. Configuration & Constants
     const ABS_ZERO = 273.15;
 
@@ -33,8 +34,8 @@ export const generateCarnotQuestion = (): GeneratedQuestion => {
 
     // 3. Select Special Variable (Engine Context)
     const engine_context_options = [
-        { label: "Motor Térmico Ideal" },
-        { label: "Planta de Potencia (Teórica)" }
+        { label: isEn ? "Ideal Heat Engine" : "Motor Térmico Ideal" },
+        { label: isEn ? "Power Plant (Theoretical)" : "Planta de Potencia (Teórica)" }
     ];
     const selectedEngine = engine_context_options[Math.floor(Math.random() * engine_context_options.length)];
 
@@ -58,9 +59,19 @@ export const generateCarnotQuestion = (): GeneratedQuestion => {
         decimals = 1;
         correctAnswer = parseFloat((efficiency_decimal * 100).toFixed(decimals));
 
-        questionLatex = `Un **${selectedEngine.label}** opera según el ciclo de Carnot entre una fuente de alta temperatura a $${temp_hot_C}^\\circ\\text{C}$ y un sumidero a $${temp_cold_C}^\\circ\\text{C}$. Calcule su eficiencia térmica máxima ($\\eta$).`;
+        questionLatex = isEn
+            ? `An **${selectedEngine.label}** operates according to the Carnot cycle between a high-temperature source at $${temp_hot_C}^\\circ\\text{C}$ and a sink at $${temp_cold_C}^\\circ\\text{C}$. Calculate its maximum thermal efficiency ($\\eta$).`
+            : `Un **${selectedEngine.label}** opera según el ciclo de Carnot entre una fuente de alta temperatura a $${temp_hot_C}^\\circ\\text{C}$ y un sumidero a $${temp_cold_C}^\\circ\\text{C}$. Calcule su eficiencia térmica máxima ($\\eta$).`;
 
-        explanation = `
+        explanation = isEn ? `
+1. **Convert to Kelvin (CRITICAL)**:
+   $T_H = ${temp_hot_C} + 273.15 = ${th_k.toFixed(2)} \\text{ K}$
+   $T_C = ${temp_cold_C} + 273.15 = ${tc_k.toFixed(2)} \\text{ K}$
+2. **Carnot Efficiency**: Maximum theoretical efficiency is given by $\\eta = 1 - \\frac{T_C}{T_H}$.
+3. **Substitution**:
+   $$\\eta = 1 - \\frac{${tc_k.toFixed(2)}}{${th_k.toFixed(2)}} = ${efficiency_decimal.toFixed(4)}$$
+4. **Result**: $\\eta = \\mathbf{${correctAnswer} \\%}$.
+    `.trim() : `
 1. **Convertir a Kelvin (CRÍTICO)**:
    $T_H = ${temp_hot_C} + 273.15 = ${th_k.toFixed(2)} \\text{ K}$
    $T_C = ${temp_cold_C} + 273.15 = ${tc_k.toFixed(2)} \\text{ K}$
@@ -81,9 +92,19 @@ export const generateCarnotQuestion = (): GeneratedQuestion => {
         const work_joules = efficiency_decimal * heat_in_joules;
         correctAnswer = parseFloat(work_joules.toFixed(decimals));
 
-        questionLatex = `Una máquina de Carnot recibe $${heat_in_joules.toLocaleString()}$ J de calor de una fuente a $${temp_hot_C}^\\circ\\text{C}$ y rechaza calor a un sumidero a $${temp_cold_C}^\\circ\\text{C}$. ¿Cuánto trabajo ($W_{\\text{neto}}$) produce?`;
+        questionLatex = isEn
+            ? `A Carnot engine receives $${heat_in_joules.toLocaleString()}$ J of heat from a source at $${temp_hot_C}^\\circ\\text{C}$ and rejects heat to a sink at $${temp_cold_C}^\\circ\\text{C}$. How much work ($W_{\\text{net}}$) does it produce?`
+            : `Una máquina de Carnot recibe $${heat_in_joules.toLocaleString()}$ J de calor de una fuente a $${temp_hot_C}^\\circ\\text{C}$ y rechaza calor a un sumidero a $${temp_cold_C}^\\circ\\text{C}$. ¿Cuánto trabajo ($W_{\\text{neto}}$) produce?`;
 
-        explanation = `
+        explanation = isEn ? `
+1. **Calculate Efficiency ($\eta$)**: First determine the Carnot efficiency using temperatures in Kelvin.
+   $$\\eta = 1 - \\frac{T_C}{T_H} = 1 - \\frac{${tc_k.toFixed(2)}}{${th_k.toFixed(2)}} = ${efficiency_decimal.toFixed(4)}$$
+2. **Definition of Efficiency**: $\\eta = \\frac{W_{\\text{net}}}{Q_{\\text{in}}}$.
+3. **Solve for Work**: $W = \\eta \\cdot Q_{\\text{in}}$.
+4. **Substitution**:
+   $$W = ${efficiency_decimal.toFixed(4)} \\times ${heat_in_joules.toLocaleString()}$$
+5. **Result**: $W = \\mathbf{${correctAnswer.toLocaleString()} \\text{ J}}$.
+    `.trim() : `
 1. **Calcular Eficiencia ($\eta$)**: Primero determinamos la eficiencia de Carnot usando temperaturas en Kelvin.
    $$\\eta = 1 - \\frac{T_C}{T_H} = 1 - \\frac{${tc_k.toFixed(2)}}{${th_k.toFixed(2)}} = ${efficiency_decimal.toFixed(4)}$$
 2. **Definición de Eficiencia**: $\\eta = \\frac{W_{\\text{neto}}}{Q_{\\text{entrada}}}$.

@@ -1,6 +1,7 @@
 // Path: src/components/TopicSelector.tsx
 import React from 'react';
 import { cn } from '../lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface TopicOption {
     id: string;
@@ -8,27 +9,11 @@ interface TopicOption {
     icon: string;
 }
 
-const TOPIC_OPTIONS: TopicOption[] = [
-    {
-        id: 'properties',
-        label: 'Propiedades',
-        icon: 'database'
-    },
-    {
-        id: 'processes',
-        label: 'Procesos',
-        icon: 'cyclone'
-    },
-    {
-        id: 'cycles',
-        label: 'Ciclos',
-        icon: 'settings_backup_restore'
-    },
-    {
-        id: 'entropy',
-        label: 'Entropía',
-        icon: 'waves'
-    }
+const TOPIC_OPTIONS = [
+    { id: 'properties', icon: 'database' },
+    { id: 'processes', icon: 'cyclone' },
+    { id: 'cycles', icon: 'settings_backup_restore' },
+    { id: 'entropy', icon: 'waves' }
 ];
 
 interface TopicSelectorProps {
@@ -37,15 +22,16 @@ interface TopicSelectorProps {
 }
 
 export const TopicSelector: React.FC<TopicSelectorProps> = ({ selectedTopics, onToggleTopic }) => {
+    const { t } = useTranslation();
     return (
         <div className="w-full space-y-3">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-accent-cyan text-sm">label_important</span>
-                    <h3 className="text-[10px] uppercase tracking-[0.2em] font-bold text-zinc-500">Tópicos de Hoy</h3>
+                    <h3 className="text-[10px] uppercase tracking-[0.2em] font-bold text-zinc-500">{t('topics.title')}</h3>
                 </div>
                 <span className="text-[10px] font-mono text-zinc-600">
-                    {selectedTopics.length}/{TOPIC_OPTIONS.length} SELECCIONADOS
+                    {selectedTopics.length}/{TOPIC_OPTIONS.length} {t('topics.selected')}
                 </span>
             </div>
 
@@ -70,7 +56,7 @@ export const TopicSelector: React.FC<TopicSelectorProps> = ({ selectedTopics, on
                                 {topic.icon}
                             </span>
                             <span className="text-xs font-bold tracking-wide">
-                                {topic.label}
+                                {t(`topics.${topic.id}`)}
                             </span>
                             {isSelected && (
                                 <span className="material-symbols-outlined text-sm font-bold animate-in zoom-in duration-300">

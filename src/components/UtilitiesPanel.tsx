@@ -1,22 +1,25 @@
 import React, { useState, useEffect } from 'react'
 import { cn, linearInterpolate } from '../lib/utils'
 import { MathText } from './MathText'
+import { useTranslation } from 'react-i18next'
 
 interface UtilitiesPanelProps {
     isOpen: boolean
     onClose: () => void
 }
 
-const CONSTANTS = [
-    { name: 'Universal Gas Constant (R)', value: '8.3144', unit: 'J/(mol·K)' },
-    { name: 'Specific Gas Constant (Air)', value: '0.287', unit: 'kJ/(kg·K)' },
-    { name: 'Standard Gravity (g)', value: '9.80665', unit: 'm/s²' },
-    { name: 'Standard Pressure (Patm)', value: '101.325', unit: 'kPa' },
-    { name: 'Specific Heat (Water)', value: '4.186', unit: 'kJ/(kg·K)' },
-    { name: 'Density (Water @ 4°C)', value: '1000', unit: 'kg/m³' },
+const getConstants = (t: any) => [
+    { name: t('constants.universal_gas'), value: '8.3144', unit: 'J/(mol·K)' },
+    { name: t('constants.air_gas'), value: '0.287', unit: 'kJ/(kg·K)' },
+    { name: t('constants.gravity'), value: '9.80665', unit: 'm/s²' },
+    { name: t('constants.std_pressure'), value: '101.325', unit: 'kPa' },
+    { name: t('constants.water_heat'), value: '4.186', unit: 'kJ/(kg·K)' },
+    { name: t('constants.water_density'), value: '1000', unit: 'kg/m³' },
 ]
 
 export const UtilitiesPanel = ({ isOpen, onClose }: UtilitiesPanelProps) => {
+    const { t } = useTranslation()
+    const CONSTANTS = getConstants(t)
     // Linear Interpolator State
     const [x0, setX0] = useState('')
     const [y0, setY0] = useState('')
@@ -42,7 +45,7 @@ export const UtilitiesPanel = ({ isOpen, onClose }: UtilitiesPanelProps) => {
 
         if (Math.abs(vx1 - vx0) < 1e-10) {
             setResult(null)
-            setError("X1 MUST BE ≠ X0")
+            setError(t('interpolator.error_divide_zero'))
             return
         }
 
@@ -69,7 +72,7 @@ export const UtilitiesPanel = ({ isOpen, onClose }: UtilitiesPanelProps) => {
             <div className="p-6 border-b border-white/5 flex items-center justify-between bg-black/20">
                 <div className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-primary">analytics</span>
-                    <h2 className="text-sm font-bold uppercase tracking-widest text-white">Engineering Toolbox</h2>
+                    <h2 className="text-sm font-bold uppercase tracking-widest text-white">{t('utilities.title')}</h2>
                 </div>
                 <button
                     onClick={onClose}
@@ -84,7 +87,7 @@ export const UtilitiesPanel = ({ isOpen, onClose }: UtilitiesPanelProps) => {
                 <section>
                     <div className="flex items-center gap-2 mb-4">
                         <span className="material-symbols-outlined text-zinc-500 text-xs">book</span>
-                        <h3 className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Thermodynamic Constants</h3>
+                        <h3 className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">{t('utilities.constants')}</h3>
                     </div>
                     <div className="bg-black/20 rounded-xl border border-white/5 overflow-hidden">
                         <table className="w-full text-left border-collapse">
@@ -110,9 +113,9 @@ export const UtilitiesPanel = ({ isOpen, onClose }: UtilitiesPanelProps) => {
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
                             <span className="material-symbols-outlined text-zinc-500 text-xs">calculate</span>
-                            <h3 className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Linear Interpolator</h3>
+                            <h3 className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">{t('interpolator.title')}</h3>
                         </div>
-                        <button onClick={clearCalculator} className="text-[9px] uppercase font-bold text-primary hover:underline">Clear</button>
+                        <button onClick={clearCalculator} className="text-[9px] uppercase font-bold text-primary hover:underline">{t('interpolator.clear_short')}</button>
                     </div>
                     <div className="bg-black/20 rounded-xl border border-white/5 p-4 space-y-4">
                         <div className="grid grid-cols-2 gap-3">
@@ -159,13 +162,13 @@ export const UtilitiesPanel = ({ isOpen, onClose }: UtilitiesPanelProps) => {
                         </div>
                         <div className="pt-2">
                             <div className="space-y-1.5">
-                                <label className="text-[9px] font-bold text-accent-cyan uppercase ml-1">Target X</label>
+                                <label className="text-[9px] font-bold text-accent-cyan uppercase ml-1">{t('interpolator.target_symbol')}</label>
                                 <input
                                     type="number"
                                     value={targetX}
                                     onChange={e => setTargetX(e.target.value)}
                                     className="w-full bg-zinc-900 border border-accent-cyan/20 rounded-lg p-2.5 text-xs font-mono text-white outline-none focus:border-accent-cyan transition-all ring-1 ring-accent-cyan/5"
-                                    placeholder="Target value"
+                                    placeholder={t('interpolator.target_placeholder_short')}
                                 />
                             </div>
                         </div>
@@ -182,8 +185,8 @@ export const UtilitiesPanel = ({ isOpen, onClose }: UtilitiesPanelProps) => {
                         {result !== null && (
                             <div className="mt-4 p-4 rounded-xl bg-primary/5 border border-primary/20 animate-in zoom-in-95 duration-200">
                                 <div className="flex items-center justify-between mb-1">
-                                    <h4 className="text-[9px] font-bold text-primary uppercase tracking-[0.2em]">Result (Y)</h4>
-                                    <span className="text-[8px] font-bold text-zinc-500 font-mono">Precision: 6 dec</span>
+                                    <h4 className="text-[9px] font-bold text-primary uppercase tracking-[0.2em]">{t('interpolator.result_symbol')}</h4>
+                                    <span className="text-[8px] font-bold text-zinc-500 font-mono">{t('interpolator.precision_short')}</span>
                                 </div>
                                 <span className="text-3xl font-black font-mono text-white tracking-tighter">{result}</span>
                             </div>

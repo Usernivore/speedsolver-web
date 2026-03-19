@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { generateSession, GeneratedQuestion } from './speedsolver_engine/thermodynamics/ThermoEngine'
 
-export type View = 'setup' | 'quiz' | 'results' | 'dashboard' | 'profile' | 'tools' | 'rankine' | 'interpolator' | 'unit-converter' | 'privacy' | 'terms'
+export type View = 'setup' | 'quiz' | 'results' | 'dashboard' | 'profile' | 'tools' | 'rankine' | 'interpolator' | 'unit-converter' | 'vector-calculator' | 'psychrometric' | 'privacy' | 'terms'
 
 export interface SessionResult {
     questionId: string
@@ -42,19 +42,24 @@ interface AppState {
     timeLimitSeconds: number | null
     timeRemaining: number | null
     answers: SessionResult[]
-    history: SessionSummary[]
-    streak: number
+    // Accumulator Stats
     totalSolved: number
+    totalCorrect: number
     totalTimeSeconds: number
-    lastActivityDate: string | null
+    streak: number
+    lastActiveDate: string | null
+    topicStats: Record<string, { correct: number, total: number }>
 
-    startSession: (total: number, timeLimit: number | null, topics: string[]) => void
+    startSession: (total: number, timeLimit: number | null, topics: string[], lang: 'es' | 'en') => void
     addResult: (result: SessionResult) => void
     nextQuestion: () => void
     finishSession: () => void
     resetSession: () => void
     updateTimeRemaining: (time: number | null) => void
-    saveSessionToHistory: () => void
+    accumulateSessionStats: () => void
+    importData: (data: any) => void
+    clearAllData: () => void
+    injectMockData: () => void
 }
 
 export const useAppStore = create<AppState>()(
@@ -78,14 +83,15 @@ export const useAppStore = create<AppState>()(
             timeLimitSeconds: 2400,
             timeRemaining: null,
             answers: [],
-            history: [],
-            streak: 0,
             totalSolved: 0,
+            totalCorrect: 0,
             totalTimeSeconds: 0,
-            lastActivityDate: null,
+            streak: 0,
+            lastActiveDate: null,
+            topicStats: {},
 
-            startSession: (total, timeLimit, topics) => {
-                const generatedQuestions = generateSession(topics, total);
+            startSession: (total, timeLimit, topics, lang) => {
+                const generatedQuestions = generateSession(topics, total, lang);
                 set({
                     currentView: 'quiz',
                     questions: generatedQuestions,
@@ -111,11 +117,16 @@ export const useAppStore = create<AppState>()(
                 set({ currentView: 'results' })
             },
 
-            saveSessionToHistory: () => {
+            accumulateSessionStats: () => {
                 const state = get()
                 if (state.answers.length === 0) return
 
-                const topicStats: { [topic: string]: { correct: number, total: number } } = {}
+                const sessionCorrect = state.answers.filter(a => a.isCorrect).length;
+                const sessionTotal = state.answers.length;
+                const sessionTime = state.answers.reduce((acc, curr) => acc + curr.timeSpent, 0);
+
+                // Update topic stats
+                const newTopicStats = { ...state.topicStats };
                 const TOPIC_MAP: Record<string, string> = {
                     "termo_properties_ideal_gas": "properties",
                     "termo_gas_density": "properties",
@@ -130,32 +141,20 @@ export const useAppStore = create<AppState>()(
                 };
 
                 state.answers.forEach(ans => {
-                    const normalizedTopic = TOPIC_MAP[ans.topic] || ans.topic;
-                    if (!topicStats[normalizedTopic]) {
-                        topicStats[normalizedTopic] = { correct: 0, total: 0 }
+                    const mappedTopic = TOPIC_MAP[ans.topic] || ans.topic;
+                    if (!newTopicStats[mappedTopic]) {
+                        newTopicStats[mappedTopic] = { correct: 0, total: 0 };
                     }
-                    topicStats[normalizedTopic].total++
+                    newTopicStats[mappedTopic].total++;
                     if (ans.isCorrect) {
-                        topicStats[normalizedTopic].correct++
+                        newTopicStats[mappedTopic].correct++;
                     }
-                })
-
-                const summary: SessionSummary = {
-                    date: new Date().toISOString(),
-                    score: state.score,
-                    totalQuestions: state.answers.length,
-                    topicStats,
-                    timeSpentSeconds: state.timeLimitSeconds !== null && state.timeRemaining !== null
-                        ? state.timeLimitSeconds - state.timeRemaining
-                        : 0
-                }
-
-                const sessionTime = state.answers.reduce((acc, curr) => acc + curr.timeSpent, 0);
+                });
 
                 // Streak Logic
                 const now = new Date();
                 const todayStr = now.toISOString().split('T')[0];
-                const lastDate = state.lastActivityDate;
+                const lastDate = state.lastActiveDate;
                 let newStreak = state.streak;
 
                 if (!lastDate) {
@@ -172,13 +171,16 @@ export const useAppStore = create<AppState>()(
                     }
                 }
 
-                set((state) => ({
-                    history: [summary, ...state.history],
-                    streak: newStreak,
-                    totalSolved: state.totalSolved + state.answers.length,
+                set({
+                    totalSolved: state.totalSolved + sessionTotal,
+                    totalCorrect: state.totalCorrect + sessionCorrect,
                     totalTimeSeconds: state.totalTimeSeconds + sessionTime,
-                    lastActivityDate: todayStr
-                }))
+                    topicStats: newTopicStats,
+                    streak: newStreak,
+                    lastActiveDate: todayStr,
+                    // Cleanup legacy history if it still exists in the state object
+                    ...({ history: undefined } as any)
+                });
             },
 
             resetSession: () => set({
@@ -190,7 +192,46 @@ export const useAppStore = create<AppState>()(
                 timeRemaining: null
             }),
 
-            updateTimeRemaining: (time) => set({ timeRemaining: time })
+            updateTimeRemaining: (time) => set({ timeRemaining: time }),
+
+            importData: (data) => set((state) => ({
+                ...state,
+                ...data,
+                // Ensure history is wiped on import if loading old format
+                history: undefined
+            })),
+
+            clearAllData: () => {
+                localStorage.removeItem('thermo-quiz-storage');
+                window.location.reload();
+            },
+
+            injectMockData: () => {
+                const coreTopics = ["properties", "processes", "cycles", "entropy"];
+
+                const mockTopicStats: Record<string, { correct: number, total: number }> = {};
+                let totalS = 0;
+                let totalC = 0;
+
+                coreTopics.forEach(topic => {
+                    const total = Math.floor(Math.random() * 41) + 10; // 10 to 50
+                    const correct = Math.floor(Math.random() * (total + 1));
+                    mockTopicStats[topic] = { correct, total };
+                    totalS += total;
+                    totalC += correct;
+                });
+
+                set({
+                    topicStats: mockTopicStats,
+                    totalSolved: totalS,
+                    totalCorrect: totalC,
+                    totalTimeSeconds: totalS * 45, // approx 45s per exercise
+                    streak: 7,
+                    lastActiveDate: new Date().toISOString().split('T')[0],
+                    // @ts-ignore
+                    history: undefined
+                });
+            }
         }),
         {
             name: 'thermo-quiz-storage',
